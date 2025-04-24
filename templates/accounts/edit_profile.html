@@ -1,0 +1,161 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Редактирование профиля" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="bubble-card mb-4">
+                <div class="bubble-card-header">
+                    <h1 class="h4 mb-0">{% trans "Редактирование профиля" %}</h1>
+                </div>
+                <div class="bubble-card-body p-0">
+                    <div class="row g-0">
+                        <!-- Боковая навигация -->
+                        <div class="col-md-3 border-end">
+                            <div class="p-3">
+                                <div class="avatar-container mb-3 text-center">
+                                    {% if user.avatar %}
+                                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="img-fluid rounded-circle profile-avatar">
+                                    {% else %}
+                                        <div class="default-avatar rounded-circle">
+                                            <span>{{ user.username|slice:":1"|upper }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="profile-nav">
+                                    <a href="{% url 'accounts:profile' %}" class="profile-nav-item">
+                                        <i class="fas fa-user"></i> {% trans "Профиль" %}
+                                    </a>
+                                    <a href="{% url 'accounts:achievements' %}" class="profile-nav-item">
+                                        <i class="fas fa-trophy"></i> {% trans "Достижения" %}
+                                    </a>
+                                    <a href="{% url 'accounts:favorite_elements' %}" class="profile-nav-item">
+                                        <i class="fas fa-star"></i> {% trans "Избранное" %}
+                                    </a>
+                                    <a href="{% url 'accounts:learning_progress' %}" class="profile-nav-item">
+                                        <i class="fas fa-chart-line"></i> {% trans "Прогресс обучения" %}
+                                    </a>
+                                    <div class="profile-nav-item active">
+                                        <i class="fas fa-edit"></i> {% trans "Редактировать профиль" %}
+                                    </div>
+                                    <a href="{% url 'accounts:logout' %}" class="profile-nav-item text-danger">
+                                        <i class="fas fa-sign-out-alt"></i> {% trans "Выйти" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Основной контент -->
+                        <div class="col-md-9">
+                            <div class="p-4">
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                                
+                                <form method="POST" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    
+                                    <div class="mb-4">
+                                        <h5>{% trans "Основная информация" %}</h5>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ user_form.username.id_for_label }}" class="form-label">{% trans "Имя пользователя" %}</label>
+                                                {{ user_form.username.errors }}
+                                                <input type="text" name="{{ user_form.username.html_name }}" 
+                                                       value="{{ user_form.username.value|default:'' }}" 
+                                                       id="{{ user_form.username.id_for_label }}" 
+                                                       class="form-control">
+                                                <div class="form-text">{{ user_form.username.help_text }}</div>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ user_form.email.id_for_label }}" class="form-label">{% trans "Email" %}</label>
+                                                {{ user_form.email.errors }}
+                                                <input type="email" name="{{ user_form.email.html_name }}" 
+                                                       value="{{ user_form.email.value|default:'' }}" 
+                                                       id="{{ user_form.email.id_for_label }}" 
+                                                       class="form-control">
+                                                <div class="form-text">{{ user_form.email.help_text }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ user_form.first_name.id_for_label }}" class="form-label">{% trans "Имя" %}</label>
+                                                {{ user_form.first_name.errors }}
+                                                <input type="text" name="{{ user_form.first_name.html_name }}" 
+                                                       value="{{ user_form.first_name.value|default:'' }}" 
+                                                       id="{{ user_form.first_name.id_for_label }}" 
+                                                       class="form-control">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ user_form.last_name.id_for_label }}" class="form-label">{% trans "Фамилия" %}</label>
+                                                {{ user_form.last_name.errors }}
+                                                <input type="text" name="{{ user_form.last_name.html_name }}" 
+                                                       value="{{ user_form.last_name.value|default:'' }}" 
+                                                       id="{{ user_form.last_name.id_for_label }}" 
+                                                       class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h5>{% trans "Дополнительная информация" %}</h5>
+                                        <div class="mb-3">
+                                            <label for="{{ profile_form.avatar.id_for_label }}" class="form-label">{% trans "Аватар" %}</label>
+                                            {{ profile_form.avatar.errors }}
+                                            <input type="file" name="{{ profile_form.avatar.html_name }}" 
+                                                   id="{{ profile_form.avatar.id_for_label }}" 
+                                                   class="form-control">
+                                            <div class="form-text">{{ profile_form.avatar.help_text }}</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="{{ profile_form.bio.id_for_label }}" class="form-label">{% trans "О себе" %}</label>
+                                            {{ profile_form.bio.errors }}
+                                            <textarea name="{{ profile_form.bio.html_name }}" 
+                                                      id="{{ profile_form.bio.id_for_label }}" 
+                                                      class="form-control" rows="4">{{ profile_form.bio.value|default:'' }}</textarea>
+                                            <div class="form-text">{{ profile_form.bio.help_text }}</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="{{ profile_form.birth_date.id_for_label }}" class="form-label">{% trans "Дата рождения" %}</label>
+                                            {{ profile_form.birth_date.errors }}
+                                            <input type="date" name="{{ profile_form.birth_date.html_name }}" 
+                                                   value="{{ profile_form.birth_date.value|date:'Y-m-d'|default:'' }}" 
+                                                   id="{{ profile_form.birth_date.id_for_label }}" 
+                                                   class="form-control">
+                                            <div class="form-text">{{ profile_form.birth_date.help_text }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <a href="{% url 'accounts:profile' %}" class="btn bubble-btn-outline">
+                                            <i class="fas fa-arrow-left me-2"></i> {% trans "Вернуться к профилю" %}
+                                        </a>
+                                        <button type="submit" class="btn bubble-btn">
+                                            <i class="fas fa-save me-2"></i> {% trans "Сохранить изменения" %}
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <hr class="my-4">
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">{% trans "Безопасность" %}</h5>
+                                    <a href="{% url 'accounts:change_password' %}" class="btn bubble-btn-outline btn-sm">
+                                        <i class="fas fa-key me-2"></i> {% trans "Изменить пароль" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

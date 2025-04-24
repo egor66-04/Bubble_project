@@ -1,0 +1,179 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Избранные реакции" %} | Bubble{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Боковое меню профиля -->
+            <div class="bubble-card mb-4 profile-sidebar">
+                <div class="bubble-card-header">
+                    <h5><i class="fas fa-user-circle"></i> {% trans "Профиль" %}</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'accounts:profile' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user"></i> {% trans "Личные данные" %}
+                    </a>
+                    <a href="{% url 'accounts:achievements' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-trophy"></i> {% trans "Достижения" %}
+                    </a>
+                    <a href="{% url 'accounts:favorite_elements' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-flask"></i> {% trans "Избранные элементы" %}
+                    </a>
+                    <a href="{% url 'accounts:favorite_reactions' %}" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-atom"></i> {% trans "Избранные реакции" %}
+                    </a>
+                    <a href="{% url 'accounts:learning_progress' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-chart-line"></i> {% trans "Прогресс обучения" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="bubble-card mb-4">
+                <div class="bubble-card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-atom"></i> {% trans "Избранные реакции" %}</h3>
+                    <span class="badge bg-primary">{{ favorite_reactions.count }}</span>
+                </div>
+                <div class="bubble-card-body">
+                    {% if favorite_reactions %}
+                        <div class="row">
+                            {% for reaction in favorite_reactions %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="bubble-card reaction-card h-100">
+                                        <div class="bubble-card-body">
+                                            <h5 class="card-title">{{ reaction.title }}</h5>
+                                            
+                                            <div class="reaction-equation mb-2">
+                                                {{ reaction.equation|safe }}
+                                            </div>
+                                            
+                                            <div class="reaction-type mb-2">
+                                                <span class="badge {% if reaction.reaction_type == 'substitution' %}bg-primary{% elif reaction.reaction_type == 'decomposition' %}bg-danger{% elif reaction.reaction_type == 'combination' %}bg-success{% elif reaction.reaction_type == 'double_displacement' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                                    {% if reaction.reaction_type == 'substitution' %}
+                                                        {% trans "Замещение" %}
+                                                    {% elif reaction.reaction_type == 'decomposition' %}
+                                                        {% trans "Разложение" %}
+                                                    {% elif reaction.reaction_type == 'combination' %}
+                                                        {% trans "Соединение" %}
+                                                    {% elif reaction.reaction_type == 'double_displacement' %}
+                                                        {% trans "Обмен" %}
+                                                    {% else %}
+                                                        {{ reaction.reaction_type }}
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                            
+                                            <p class="card-text small">{{ reaction.description|truncatechars:100 }}</p>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                <a href="{% url 'chemistry:reaction_detail' reaction.id %}" class="btn bubble-btn-sm">
+                                                    {% trans "Подробнее" %}
+                                                </a>
+                                                <button 
+                                                    class="btn btn-outline-danger btn-sm favorite-reaction" 
+                                                    data-reaction-id="{{ reaction.id }}"
+                                                    data-is-favorite="true"
+                                                    title="{% trans 'Удалить из избранного' %}">
+                                                    <i class="fas fa-heart"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <img src="{% static 'images/empty-favorites.svg' %}" alt="No favorites" class="img-fluid mb-3" style="max-height: 150px;">
+                            <h4>{% trans "У вас пока нет избранных реакций" %}</h4>
+                            <p>{% trans "Добавляйте интересные реакции в избранное, чтобы быстро находить их позже" %}</p>
+                            <a href="{% url 'chemistry:reaction_list' %}" class="btn bubble-btn mt-3">
+                                <i class="fas fa-atom"></i> {% trans "Перейти к реакциям" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработчик для кнопок избранного
+    document.querySelectorAll('.favorite-reaction').forEach(button => {
+        button.addEventListener('click', function() {
+            const reactionId = this.dataset.reactionId;
+            
+            // Отправляем запрос на сервер
+            fetch('{% url "accounts:toggle_favorite_reaction" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `reaction_id=${reactionId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Удаляем карточку реакции из DOM
+                    const card = this.closest('.col-md-6');
+                    card.classList.add('fade-out');
+                    
+                    setTimeout(() => {
+                        card.remove();
+                        
+                        // Обновляем счетчик избранных реакций
+                        const countBadge = document.querySelector('.bubble-card-header .badge');
+                        const currentCount = parseInt(countBadge.textContent);
+                        countBadge.textContent = currentCount - 1;
+                        
+                        // Проверяем, остались ли еще реакции
+                        const remainingCards = document.querySelectorAll('.reaction-card');
+                        if (remainingCards.length === 0) {
+                            // Если реакций не осталось, показываем сообщение
+                            const cardBody = document.querySelector('.bubble-card-body');
+                            cardBody.innerHTML = `
+                                <div class="text-center py-5">
+                                    <img src="{% static 'images/empty-favorites.svg' %}" alt="No favorites" class="img-fluid mb-3" style="max-height: 150px;">
+                                    <h4>{% trans "У вас пока нет избранных реакций" %}</h4>
+                                    <p>{% trans "Добавляйте интересные реакции в избранное, чтобы быстро находить их позже" %}</p>
+                                    <a href="{% url 'chemistry:reaction_list' %}" class="btn bubble-btn mt-3">
+                                        <i class="fas fa-atom"></i> {% trans "Перейти к реакциям" %}
+                                    </a>
+                                </div>`;
+                        }
+                    }, 300);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+        });
+    });
+});
+</script>
+
+<style>
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.reaction-equation {
+    background: rgba(0, 0, 0, 0.02);
+    padding: 8px;
+    border-radius: 5px;
+    font-family: monospace;
+    text-align: center;
+}
+</style>
+{% endblock %} 

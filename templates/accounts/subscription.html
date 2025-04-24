@@ -1,0 +1,194 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Подписка" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="subscription-header text-center mb-5">
+                <h1 class="bubble-section-title">{% trans "Подписка Bubble Pro" %}</h1>
+                <p class="lead">{% trans "Открой все возможности Bubble с премиум-подпиской" %}</p>
+            </div>
+
+            {% if is_subscribed %}
+            <div class="bubble-card active-subscription p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="h4 mb-3">{% trans "У вас активная подписка" %}</h2>
+                        <p class="mb-1">{% trans "Статус:" %} <span class="badge bg-success">{% trans "Активна" %}</span></p>
+                        <p class="mb-1">{% trans "Действует до:" %} <strong>{{ subscription_end_date|date:"d.m.Y" }}</strong></p>
+                    </div>
+                    <div class="subscription-badge">
+                        <i class="fas fa-crown fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="subscription-plans mb-5">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="bubble-card p-4 h-100 plan-free">
+                            <div class="plan-header mb-3">
+                                <h2 class="h4">{% trans "Бесплатный" %}</h2>
+                                <p class="text-muted">{% trans "Базовые возможности" %}</p>
+                                <div class="plan-price">
+                                    <span class="price">0₽</span>
+                                    <span class="period">/ {% trans "месяц" %}</span>
+                                </div>
+                            </div>
+                            <div class="plan-features">
+                                <ul class="list-unstyled mb-4">
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Доступ к таблице Менделеева" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Базовая информация об элементах" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Простые химические реакции" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Базовые викторины" %}</li>
+                                    <li><i class="fas fa-times text-danger me-2"></i> {% trans "Расширенная информация" %}</li>
+                                    <li><i class="fas fa-times text-danger me-2"></i> {% trans "Видео химических реакций" %}</li>
+                                    <li><i class="fas fa-times text-danger me-2"></i> {% trans "Продвинутые тесты и викторины" %}</li>
+                                    <li><i class="fas fa-times text-danger me-2"></i> {% trans "Без рекламы" %}</li>
+                                </ul>
+                            </div>
+                            <div class="plan-footer">
+                                <p class="text-muted mb-0">{% trans "Текущий план" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="bubble-card p-4 h-100 plan-pro">
+                            <div class="ribbon">{% trans "Лучший выбор" %}</div>
+                            <div class="plan-header mb-3">
+                                <h2 class="h4">{% trans "Bubble Pro" %}</h2>
+                                <p class="text-muted">{% trans "Полный доступ" %}</p>
+                                <div class="plan-price">
+                                    <span class="price">299₽</span>
+                                    <span class="period">/ {% trans "месяц" %}</span>
+                                </div>
+                            </div>
+                            <div class="plan-features">
+                                <ul class="list-unstyled mb-4">
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Доступ к таблице Менделеева" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Детальная информация об элементах" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Все химические реакции" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Все викторины и тесты" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Расширенная справочная информация" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Видео химических реакций" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Интерактивные практические задания" %}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {% trans "Без рекламы" %}</li>
+                                </ul>
+                            </div>
+                            <div class="plan-footer">
+                                {% if is_subscribed %}
+                                <span class="btn bubble-btn-lg w-100 disabled">
+                                    <i class="fas fa-crown me-2"></i> {% trans "Уже подключено" %}
+                                </span>
+                                {% else %}
+                                <a href="{% url 'accounts:subscription_checkout' %}" class="btn bubble-btn-lg w-100">
+                                    <i class="fas fa-crown me-2"></i> {% trans "Купить подписку" %}
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subscription-features mb-5">
+                <h2 class="h3 text-center mb-4">{% trans "Что вы получите с подпиской Bubble Pro" %}</h2>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="feature-item d-flex align-items-center">
+                            <div class="feature-icon me-3">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="feature-description">
+                                <h3 class="h5">{% trans "Полная база данных" %}</h3>
+                                <p class="mb-0">{% trans "Доступ ко всем элементам и их детальному описанию" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="feature-item d-flex align-items-center">
+                            <div class="feature-icon me-3">
+                                <i class="fas fa-video"></i>
+                            </div>
+                            <div class="feature-description">
+                                <h3 class="h5">{% trans "Видео реакций" %}</h3>
+                                <p class="mb-0">{% trans "Наглядные видео химических реакций и экспериментов" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="feature-item d-flex align-items-center">
+                            <div class="feature-icon me-3">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="feature-description">
+                                <h3 class="h5">{% trans "Продвинутые тесты" %}</h3>
+                                <p class="mb-0">{% trans "Доступ к сложным викторинам и интерактивным заданиям" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="feature-item d-flex align-items-center">
+                            <div class="feature-icon me-3">
+                                <i class="fas fa-ad"></i>
+                            </div>
+                            <div class="feature-description">
+                                <h3 class="h5">{% trans "Без рекламы" %}</h3>
+                                <p class="mb-0">{% trans "Комфортное использование без рекламных баннеров" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subscription-faq">
+                <h2 class="h3 text-center mb-4">{% trans "Часто задаваемые вопросы" %}</h2>
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                {% trans "Могу ли я отменить подписку в любой момент?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Да, вы можете отменить подписку в любой момент. Ваша подписка будет активна до конца оплаченного периода." %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                {% trans "Какие способы оплаты доступны?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Мы принимаем банковские карты (Visa, MasterCard, МИР) и электронные платежи через ЮMoney, QIWI и WebMoney." %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                {% trans "Есть ли семейная подписка?" %}
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "В настоящее время мы работаем над семейной подпиской, которая позволит подключать до 5 аккаунтов. Она будет доступна в ближайшее время." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

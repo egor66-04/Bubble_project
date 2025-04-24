@@ -1,0 +1,105 @@
+/* Стили для админки пользователей */
+
+/* Стилизация заголовков */
+.module h2, .app-accounts .app-list-label {
+    color: #35847d !important;
+    font-weight: 600 !important;
+}
+
+/* Стилизация аватаров пользователей */
+.field-avatar_thumbnail img,
+.field-avatar_thumbnail div {
+    transition: transform 0.3s ease;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.field-avatar_thumbnail img:hover,
+.field-avatar_thumbnail div:hover {
+    transform: scale(1.15);
+}
+
+/* Стилизация уровней и подписок */
+.field-level_badge span {
+    font-size: 0.85em;
+    display: inline-block;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    min-width: 30px;
+    text-align: center;
+}
+
+.field-subscription_status span {
+    font-weight: 500;
+}
+
+.field-subscription_status span i {
+    margin-right: 5px;
+}
+
+/* Стилизация прогресс-баров */
+.field-progress_bar div,
+.field-percent_score div {
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Стилизация выпадающих списков */
+.app-accounts select {
+    border-color: #35847d !important;
+}
+
+/* Стилизация полей */
+.app-accounts input[type="text"],
+.app-accounts input[type="email"],
+.app-accounts input[type="password"],
+.app-accounts input[type="number"],
+.app-accounts select,
+.app-accounts textarea {
+    border-radius: 5px !important;
+    border: 1px solid #ced4da !important;
+    padding: 8px 12px !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.app-accounts input[type="text"]:focus,
+.app-accounts input[type="email"]:focus,
+.app-accounts input[type="password"]:focus,
+.app-accounts input[type="number"]:focus,
+.app-accounts select:focus,
+.app-accounts textarea:focus {
+    border-color: #35847d !important;
+    box-shadow: 0 0 0 0.2rem rgba(53, 132, 125, 0.25) !important;
+}
+
+/* Стилизация кнопок */
+.app-accounts .button {
+    border-radius: 5px !important;
+}
+
+/* Стилизация вкладок с достижениями */
+.field-achievement_with_type span,
+.field-achievement_type_badge span {
+    font-size: 0.85em;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Стилизация превью изображений */
+.field-icon_display i {
+    font-size: 1.5em;
+    color: #35847d;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 767px) {
+    .field-avatar_thumbnail, .field-level_badge, .field-progress_bar, .field-percent_score {
+        text-align: center;
+    }
+    
+    .app-accounts .submit-row {
+        padding: 10px !important;
+    }
+    
+    .app-accounts .submit-row input {
+        margin: 5px 0 !important;
+    }
+} 

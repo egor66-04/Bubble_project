@@ -1,0 +1,169 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Профиль пользователя" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="bubble-card profile-sidebar">
+                <div class="text-center mb-4">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="profile-avatar mb-3">
+                    {% else %}
+                        <div class="profile-avatar-placeholder mb-3">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                    {% endif %}
+                    <h3 class="h4">{{ user.get_full_name|default:user.username }}</h3>
+                    <p class="text-muted">{{ user.email }}</p>
+                    
+                    {% if user.is_subscribed %}
+                    <div class="subscription-badge">
+                        <i class="fas fa-crown"></i> {% trans "Premium подписка" %}
+                    </div>
+                    <small class="text-muted d-block mt-1">
+                        {% trans "До" %} {{ user.subscription_end_date|date:"d.m.Y" }}
+                    </small>
+                    {% else %}
+                    <a href="{% url 'accounts:subscription' %}" class="btn bubble-btn-secondary btn-sm mt-2">
+                        <i class="fas fa-crown"></i> {% trans "Купить подписку" %}
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <div class="profile-nav">
+                    <div class="profile-nav-item active">
+                        <i class="fas fa-user"></i> {% trans "Профиль" %}
+                    </div>
+                    <a href="{% url 'accounts:achievements' %}" class="profile-nav-item">
+                        <i class="fas fa-trophy"></i> {% trans "Достижения" %}
+                    </a>
+                    <a href="{% url 'accounts:favorite_elements' %}" class="profile-nav-item">
+                        <i class="fas fa-star"></i> {% trans "Избранное" %}
+                    </a>
+                    <a href="{% url 'accounts:learning_progress' %}" class="profile-nav-item">
+                        <i class="fas fa-chart-line"></i> {% trans "Прогресс обучения" %}
+                    </a>
+                    <a href="{% url 'accounts:edit_profile' %}" class="profile-nav-item">
+                        <i class="fas fa-edit"></i> {% trans "Редактировать профиль" %}
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="profile-nav-item text-danger">
+                        <i class="fas fa-sign-out-alt"></i> {% trans "Выйти" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <!-- Карточка достижений пользователя -->
+            <div class="bubble-card mb-4">
+                <div class="bubble-card-header">
+                    <h4><i class="fas fa-user-graduate"></i> {% trans "Уровень и опыт" %}</h4>
+                </div>
+                <div class="bubble-card-body">
+                    <div class="level-display">
+                        <div class="current-level">
+                            <span class="level-number">{{ user.level }}</span>
+                            <span class="level-label">{% trans "Уровень" %}</span>
+                        </div>
+                        <div class="level-progress-container">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: {{ level_progress_percent }}%"></div>
+                            </div>
+                            <div class="level-progress-labels d-flex justify-content-between">
+                                <small>{{ user.xp_points }} XP</small>
+                                <small>{{ xp_needed }} XP {% trans "до" %} {{ user.level|add:1 }} {% trans "уровня" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Карточка прогресса обучения -->
+            <div class="bubble-card mb-4">
+                <div class="bubble-card-header">
+                    <h4><i class="fas fa-flask"></i> {% trans "Прогресс изучения элементов" %}</h4>
+                </div>
+                <div class="bubble-card-body">
+                    <div class="elements-progress-stats mb-3">
+                        <div class="elements-progress-stat">
+                            <div class="stat-value">{{ learned_elements_count }}</div>
+                            <div class="stat-label">{% trans "Изучено" %}</div>
+                        </div>
+                        <div class="elements-progress-stat">
+                            <div class="stat-value">{{ total_elements_count }}</div>
+                            <div class="stat-label">{% trans "Всего" %}</div>
+                        </div>
+                        <div class="elements-progress-stat">
+                            <div class="stat-value">{{ learning_progress_percent }}%</div>
+                            <div class="stat-label">{% trans "Прогресс" %}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" style="width: {{ learning_progress_percent }}%"></div>
+                    </div>
+                    
+                    {% if recent_elements %}
+                    <h5 class="mb-3">{% trans "Недавно изученные элементы:" %}</h5>
+                    <div class="row row-cols-2 row-cols-md-5 g-2">
+                        {% for progress in recent_elements %}
+                        <div class="col">
+                            <a href="{% url 'chemistry:element_detail' progress.element.atomic_number %}" class="text-decoration-none">
+                                <div class="element-card-small" style="background-color: {{ progress.element.category.color }};">
+                                    <div class="element-symbol">{{ progress.element.symbol }}</div>
+                                    <div class="element-name small">{{ progress.element.name }}</div>
+                                    <div class="progress-indicator" style="width: {{ progress.progress_percent }}%"></div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Карточка статистики тестов -->
+            <div class="bubble-card">
+                <div class="bubble-card-header">
+                    <h4><i class="fas fa-question-circle"></i> {% trans "Статистика тестов" %}</h4>
+                </div>
+                <div class="bubble-card-body">
+                    <div class="quiz-stats d-flex justify-content-around mb-4">
+                        <div class="quiz-stat text-center">
+                            <div class="quiz-stat-value">{{ quiz_completed_count }}</div>
+                            <div class="quiz-stat-label">{% trans "Пройдено тестов" %}</div>
+                        </div>
+                        <div class="quiz-stat text-center">
+                            <div class="quiz-stat-value">{{ avg_quiz_score_percent }}%</div>
+                            <div class="quiz-stat-label">{% trans "Средний результат" %}</div>
+                        </div>
+                    </div>
+                    
+                    {% if recent_achievements %}
+                    <h5 class="mb-3">{% trans "Недавние достижения:" %}</h5>
+                    <div class="recent-achievements">
+                        {% for achievement in recent_achievements %}
+                        <div class="achievement-badge">
+                            <div class="achievement-icon">
+                                <i class="{{ achievement.achievement.icon }}"></i>
+                            </div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">{{ achievement.achievement.name }}</div>
+                                <div class="achievement-date small">{{ achievement.achieved_at|date:"d.m.Y" }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

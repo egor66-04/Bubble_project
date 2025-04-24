@@ -1,0 +1,152 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Оформление подписки" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="bubble-card p-4">
+                <div class="text-center mb-4">
+                    <h1 class="bubble-section-title">{% trans "Оформление подписки" %}</h1>
+                    <p class="lead">{% trans "Вы в одном шаге от полного доступа ко всем возможностям Bubble" %}</p>
+                </div>
+
+                <div class="order-summary mb-4">
+                    <h2 class="h4 mb-3">{% trans "Информация о подписке" %}</h2>
+                    <div class="subscription-details p-3 bg-light rounded mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>{% trans "План:" %}</strong> Bubble Pro</p>
+                                <p><strong>{% trans "Стоимость:" %}</strong> 299₽ / {% trans "месяц" %}</p>
+                                <p><strong>{% trans "Период:" %}</strong> 1 {% trans "месяц" %}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>{% trans "Дата начала:" %}</strong> {% now "d.m.Y" %}</p>
+                                <p><strong>{% trans "Автопродление:" %}</strong> {% trans "Включено" %}</p>
+                                <p><strong>{% trans "Итого к оплате:" %}</strong> <span class="text-primary fw-bold">299₽</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-form mb-4">
+                    <h2 class="h4 mb-3">{% trans "Способ оплаты" %}</h2>
+                    <div class="payment-methods mb-3">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="card" value="card" checked>
+                            <label class="form-check-label" for="card">
+                                <i class="fas fa-credit-card me-1"></i> {% trans "Банковская карта" %}
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="yoomoney" value="yoomoney">
+                            <label class="form-check-label" for="yoomoney">
+                                <i class="fab fa-yandex me-1"></i> {% trans "ЮMoney" %}
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="qiwi" value="qiwi">
+                            <label class="form-check-label" for="qiwi">
+                                <i class="fas fa-wallet me-1"></i> {% trans "QIWI" %}
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Форма оплаты картой (показывается по умолчанию) -->
+                    <div id="cardPaymentForm" class="payment-form-section">
+                        <div class="mb-3">
+                            <label for="cardNumber" class="form-label">{% trans "Номер карты" %}</label>
+                            <input type="text" class="form-control" id="cardNumber" placeholder="0000 0000 0000 0000">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="cardExpiry" class="form-label">{% trans "Срок действия" %}</label>
+                                <input type="text" class="form-control" id="cardExpiry" placeholder="ММ/ГГ">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="cardCVC" class="form-label">{% trans "CVC/CVV" %}</label>
+                                <input type="text" class="form-control" id="cardCVC" placeholder="123">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cardHolder" class="form-label">{% trans "Владелец карты" %}</label>
+                            <input type="text" class="form-control" id="cardHolder" placeholder="IVAN IVANOV">
+                        </div>
+                    </div>
+
+                    <!-- Имитация других способов оплаты (скрыты по умолчанию) -->
+                    <div id="yoomoneyPaymentForm" class="payment-form-section d-none">
+                        <div class="alert alert-info">
+                            {% trans "Вы будете перенаправлены на страницу ЮMoney для завершения платежа." %}
+                        </div>
+                    </div>
+
+                    <div id="qiwiPaymentForm" class="payment-form-section d-none">
+                        <div class="alert alert-info">
+                            {% trans "Вы будете перенаправлены на страницу QIWI для завершения платежа." %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="agreement-section mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                        <label class="form-check-label" for="agreeTerms">
+                            {% trans "Я согласен с условиями подписки и политикой конфиденциальности" %}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'accounts:subscription_success' %}" class="btn bubble-btn-lg">
+                        <i class="fas fa-lock me-2"></i> {% trans "Оплатить 299₽" %}
+                    </a>
+                    <a href="{% url 'accounts:subscription' %}" class="btn bubble-btn-secondary">
+                        {% trans "Вернуться назад" %}
+                    </a>
+                </div>
+            </div>
+
+            <div class="payment-info text-center mt-4">
+                <p class="text-muted small">
+                    <i class="fas fa-lock me-1"></i> {% trans "Все платежи обрабатываются в безопасном режиме" %}
+                </p>
+                <div class="payment-logos">
+                    <i class="fab fa-cc-visa mx-1 fa-2x"></i>
+                    <i class="fab fa-cc-mastercard mx-1 fa-2x"></i>
+                    <i class="fab fa-cc-jcb mx-1 fa-2x"></i>
+                    <i class="fab fa-cc-amex mx-1 fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Переключение между способами оплаты
+        const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
+        const paymentForms = document.querySelectorAll('.payment-form-section');
+        
+        paymentMethods.forEach(method => {
+            method.addEventListener('change', function() {
+                // Скрываем все формы
+                paymentForms.forEach(form => {
+                    form.classList.add('d-none');
+                });
+                
+                // Показываем соответствующую форму
+                const selectedForm = document.getElementById(`${this.value}PaymentForm`);
+                if (selectedForm) {
+                    selectedForm.classList.remove('d-none');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

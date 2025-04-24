@@ -1,0 +1,197 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Достижения" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Боковая навигация -->
+        <div class="col-lg-3">
+            <div class="bubble-card mb-3">
+                <div class="p-3">
+                    <div class="avatar-container mb-3 text-center">
+                        {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="img-fluid rounded-circle profile-avatar">
+                        {% else %}
+                            <div class="default-avatar rounded-circle">
+                                <span>{{ user.username|slice:":1"|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="profile-info text-center mb-3">
+                        <h4 class="profile-name">{{ user.username }}</h4>
+                        <div class="profile-level">
+                            <span class="badge bubble-badge">{% trans "Уровень" %} {{ user.level }}</span>
+                        </div>
+                    </div>
+                    <div class="profile-nav">
+                        <a href="{% url 'accounts:profile' %}" class="profile-nav-item">
+                            <i class="fas fa-user"></i> {% trans "Профиль" %}
+                        </a>
+                        <div class="profile-nav-item active">
+                            <i class="fas fa-trophy"></i> {% trans "Достижения" %}
+                        </div>
+                        <a href="{% url 'accounts:favorite_elements' %}" class="profile-nav-item">
+                            <i class="fas fa-star"></i> {% trans "Избранное" %}
+                        </a>
+                        <a href="{% url 'accounts:learning_progress' %}" class="profile-nav-item">
+                            <i class="fas fa-chart-line"></i> {% trans "Прогресс обучения" %}
+                        </a>
+                        <a href="{% url 'accounts:edit_profile' %}" class="profile-nav-item">
+                            <i class="fas fa-edit"></i> {% trans "Редактировать профиль" %}
+                        </a>
+                        <a href="{% url 'accounts:logout' %}" class="profile-nav-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i> {% trans "Выйти" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Основной контент -->
+        <div class="col-lg-9">
+            <div class="bubble-card">
+                <div class="bubble-card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-trophy"></i> {% trans "Мои достижения" %}</h4>
+                    <span class="badge bubble-badge">{{ user_achievements.count }}</span>
+                </div>
+                <div class="bubble-card-body">
+                    <div class="achievements-grid">
+                        {% for item in all_achievements %}
+                            <div class="achievement-card {% if not item.is_earned %}achievement-locked{% endif %}">
+                                <div class="achievement-icon">
+                                    <i class="{{ item.achievement.icon }}"></i>
+                                </div>
+                                <div class="achievement-content">
+                                    <div class="achievement-header">
+                                        <h5 class="achievement-title">
+                                            {% if item.achievement.emoji %}{{ item.achievement.emoji }} {% endif %}{{ item.achievement.name }}
+                                        </h5>
+                                        <div class="achievement-xp">+{{ item.achievement.xp_reward }} XP</div>
+                                    </div>
+                                    <div class="achievement-description">
+                                        {{ item.achievement.description }}
+                                    </div>
+                                    {% if item.is_earned %}
+                                        <div class="achievement-date">
+                                            <i class="fas fa-calendar-alt"></i> {{ item.user_achievement.achieved_at|date:"d.m.Y" }}
+                                        </div>
+                                    {% else %}
+                                        <div class="achievement-status">
+                                            <i class="fas fa-lock"></i> {% trans "Не получено" %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="empty-state text-center py-5">
+                                <div class="empty-state-icon mb-3">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <h3>{% trans "Нет доступных достижений" %}</h3>
+                                <p class="text-muted">{% trans "Начните использовать платформу, чтобы получать достижения!" %}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .achievement-card {
+        display: flex;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .achievement-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .achievement-locked {
+        opacity: 0.7;
+        background-color: #f8f9fa;
+    }
+    
+    .achievement-locked .achievement-icon {
+        background-color: #adb5bd;
+    }
+    
+    .achievement-icon {
+        background-color: var(--bubble-primary);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .achievement-content {
+        flex-grow: 1;
+    }
+    
+    .achievement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 5px;
+    }
+    
+    .achievement-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0;
+        color: var(--bubble-dark);
+    }
+    
+    .achievement-xp {
+        font-size: 14px;
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    .achievement-description {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 8px;
+    }
+    
+    .achievement-date, .achievement-status {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .achievement-status {
+        color: #dc3545;
+    }
+    
+    .empty-state {
+        width: 100%;
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        color: #dee2e6;
+    }
+</style>
+{% endblock %} 

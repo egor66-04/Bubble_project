@@ -1,0 +1,202 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Прогресс обучения" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="bubble-card profile-sidebar">
+                <div class="text-center mb-4">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="profile-avatar mb-3">
+                    {% else %}
+                        <div class="profile-avatar-placeholder mb-3">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                    {% endif %}
+                    <h3 class="h4">{{ user.get_full_name|default:user.username }}</h3>
+                    <p class="text-muted">{{ user.email }}</p>
+                </div>
+                
+                <div class="profile-nav">
+                    <a href="{% url 'accounts:profile' %}" class="profile-nav-item">
+                        <i class="fas fa-user"></i> {% trans "Профиль" %}
+                    </a>
+                    <a href="{% url 'accounts:achievements' %}" class="profile-nav-item">
+                        <i class="fas fa-trophy"></i> {% trans "Достижения" %}
+                    </a>
+                    <a href="{% url 'accounts:favorite_elements' %}" class="profile-nav-item">
+                        <i class="fas fa-star"></i> {% trans "Избранное" %}
+                    </a>
+                    <div class="profile-nav-item active">
+                        <i class="fas fa-chart-line"></i> {% trans "Прогресс обучения" %}
+                    </div>
+                    <a href="{% url 'accounts:edit_profile' %}" class="profile-nav-item">
+                        <i class="fas fa-edit"></i> {% trans "Редактировать профиль" %}
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="profile-nav-item text-danger">
+                        <i class="fas fa-sign-out-alt"></i> {% trans "Выйти" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <!-- Общая статистика -->
+            <div class="bubble-card mb-4">
+                <div class="bubble-card-header">
+                    <h4><i class="fas fa-chart-line"></i> {% trans "Общий прогресс" %}</h4>
+                </div>
+                <div class="bubble-card-body">
+                    <div class="progress-stats d-flex justify-content-between mb-4">
+                        <div class="progress-stat text-center">
+                            <div class="stat-value">{{ learned_elements }}</div>
+                            <div class="stat-label">{% trans "Изучено" %}</div>
+                        </div>
+                        <div class="progress-stat text-center">
+                            <div class="stat-value">{{ in_progress_elements }}</div>
+                            <div class="stat-label">{% trans "В процессе" %}</div>
+                        </div>
+                        <div class="progress-stat text-center">
+                            <div class="stat-value">{{ not_started_elements }}</div>
+                            <div class="stat-label">{% trans "Не начато" %}</div>
+                        </div>
+                        <div class="progress-stat text-center">
+                            <div class="stat-value">{{ total_elements }}</div>
+                            <div class="stat-label">{% trans "Всего" %}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-chart mb-4">
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ learned_elements_percent }}%" 
+                                 aria-valuenow="{{ learned_elements }}" aria-valuemin="0" aria-valuemax="{{ total_elements }}">
+                                {{ learned_elements_percent }}%
+                            </div>
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ in_progress_elements_percent }}%" 
+                                 aria-valuenow="{{ in_progress_elements }}" aria-valuemin="0" aria-valuemax="{{ total_elements }}">
+                                {{ in_progress_elements_percent }}%
+                            </div>
+                        </div>
+                        <div class="progress-legend d-flex justify-content-between mt-2">
+                            <div class="legend-item">
+                                <span class="legend-color bg-success"></span>
+                                <span class="legend-text">{% trans "Изучено" %}</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color bg-warning"></span>
+                                <span class="legend-text">{% trans "В процессе" %}</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color bg-light"></span>
+                                <span class="legend-text">{% trans "Не начато" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="total-progress text-center">
+                        <div class="total-progress-circle">
+                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="circle" stroke-dasharray="{{ total_progress_percent }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <text x="18" y="20.35" class="percentage">{{ total_progress_percent }}%</text>
+                            </svg>
+                        </div>
+                        <h5 class="mt-3">{% trans "Общий прогресс обучения" %}</h5>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Список элементов с прогрессом -->
+            <div class="bubble-card">
+                <div class="bubble-card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-flask"></i> {% trans "Прогресс по элементам" %}</h4>
+                    <div class="element-filter">
+                        <select id="progressFilter" class="form-select form-select-sm">
+                            <option value="all">{% trans "Все элементы" %}</option>
+                            <option value="completed">{% trans "Изученные" %}</option>
+                            <option value="in-progress">{% trans "В процессе" %}</option>
+                            <option value="not-started">{% trans "Не начатые" %}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bubble-card-body">
+                    {% if element_progress %}
+                        <div class="row row-cols-1 row-cols-md-2 g-4 element-progress-list">
+                            {% for progress in element_progress %}
+                                <div class="col element-progress-item {% if progress.is_learned %}completed{% elif progress.progress_percent > 0 %}in-progress{% else %}not-started{% endif %}">
+                                    <div class="element-progress-card">
+                                        <div class="element-info" style="background-color: {{ progress.element.category.color }};">
+                                            <div class="element-symbol">{{ progress.element.symbol }}</div>
+                                            <div class="element-name">{{ progress.element.name }}</div>
+                                        </div>
+                                        <div class="element-progress-info">
+                                            <div class="progress">
+                                                <div class="progress-bar {% if progress.is_learned %}bg-success{% else %}bg-warning{% endif %}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ progress.progress_percent }}%"></div>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                <div class="progress-percent">{{ progress.progress_percent }}%</div>
+                                                <div class="progress-status">
+                                                    {% if progress.is_learned %}
+                                                        <span class="badge bg-success">{% trans "Изучено" %}</span>
+                                                    {% elif progress.progress_percent > 0 %}
+                                                        <span class="badge bg-warning">{% trans "В процессе" %}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-light text-dark">{% trans "Не начато" %}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <a href="{% url 'chemistry:element_detail' progress.element.atomic_number %}" class="btn btn-sm bubble-btn-outline w-100 mt-2">
+                                                <i class="fas fa-eye"></i> {% trans "Просмотреть элемент" %}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state text-center py-5">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-flask"></i>
+                            </div>
+                            <h5>{% trans "Вы еще не начали изучать элементы" %}</h5>
+                            <p class="text-muted">{% trans "Начните изучение элементов, чтобы отслеживать свой прогресс" %}</p>
+                            <a href="{% url 'chemistry:element_list' %}" class="btn bubble-btn mt-3">
+                                <i class="fas fa-flask"></i> {% trans "Начать изучение" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if element_progress %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressFilter = document.getElementById('progressFilter');
+        const elementItems = document.querySelectorAll('.element-progress-item');
+        
+        progressFilter.addEventListener('change', function() {
+            const filterValue = this.value;
+            
+            elementItems.forEach(item => {
+                if (filterValue === 'all' || item.classList.contains(filterValue)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endif %}
+{% endblock %} 

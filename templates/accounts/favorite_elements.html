@@ -1,0 +1,187 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Избранные элементы" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="bubble-card profile-sidebar">
+                <div class="text-center mb-4">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="profile-avatar mb-3">
+                    {% else %}
+                        <div class="profile-avatar-placeholder mb-3">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                    {% endif %}
+                    <h3 class="h4">{{ user.get_full_name|default:user.username }}</h3>
+                    <p class="text-muted">{{ user.email }}</p>
+                </div>
+                
+                <div class="profile-nav">
+                    <a href="{% url 'accounts:profile' %}" class="profile-nav-item">
+                        <i class="fas fa-user"></i> {% trans "Профиль" %}
+                    </a>
+                    <a href="{% url 'accounts:achievements' %}" class="profile-nav-item">
+                        <i class="fas fa-trophy"></i> {% trans "Достижения" %}
+                    </a>
+                    <div class="profile-nav-item active">
+                        <i class="fas fa-star"></i> {% trans "Избранное" %}
+                    </div>
+                    <a href="{% url 'accounts:learning_progress' %}" class="profile-nav-item">
+                        <i class="fas fa-chart-line"></i> {% trans "Прогресс обучения" %}
+                    </a>
+                    <a href="{% url 'accounts:edit_profile' %}" class="profile-nav-item">
+                        <i class="fas fa-edit"></i> {% trans "Редактировать профиль" %}
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="profile-nav-item text-danger">
+                        <i class="fas fa-sign-out-alt"></i> {% trans "Выйти" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="bubble-card">
+                <div class="bubble-card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-star"></i> {% trans "Избранные элементы" %}</h4>
+                    <span class="badge bubble-badge">{{ favorite_elements.count }}</span>
+                </div>
+                <div class="bubble-card-body">
+                    {% if favorite_elements %}
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                            {% for favorite in favorite_elements %}
+                                <div class="col">
+                                    <div class="favorite-element-card" style="background-color: {{ favorite.category.color }};">
+                                        <a href="{% url 'chemistry:element_detail' favorite.atomic_number %}" class="favorite-element-link">
+                                            <div class="element-number small">{{ favorite.atomic_number }}</div>
+                                            <div class="element-symbol">{{ favorite.symbol }}</div>
+                                            <div class="element-name">{{ favorite.name }}</div>
+                                            <div class="element-details small">
+                                                <span>{{ favorite.atomic_weight }}</span>
+                                                <span>{{ favorite.get_state_display }}</span>
+                                            </div>
+                                        </a>
+                                        <div class="favorite-actions">
+                                            <button class="btn btn-sm btn-danger remove-favorite" 
+                                                   data-element-id="{{ favorite.id }}"
+                                                   data-bs-toggle="tooltip" 
+                                                   title="{% trans 'Удалить из избранного' %}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state text-center py-5">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h5>{% trans "У вас пока нет избранных элементов" %}</h5>
+                            <p class="text-muted">{% trans "Добавляйте интересные химические элементы в избранное, чтобы вернуться к ним позже" %}</p>
+                            <a href="{% url 'chemistry:element_list' %}" class="btn bubble-btn mt-3">
+                                <i class="fas fa-flask"></i> {% trans "Просмотреть элементы" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if favorite_elements %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация тултипов
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Обработка удаления из избранного
+        const removeButtons = document.querySelectorAll('.remove-favorite');
+        removeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const elementId = this.dataset.elementId;
+                
+                if (confirm('{% trans "Вы уверены, что хотите удалить этот элемент из избранного?" %}')) {
+                    fetch(`/chemistry/api/elements/toggle-favorite/${elementId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Удаляем карточку с анимацией
+                            const card = this.closest('.col');
+                            card.style.transition = 'all 0.3s ease';
+                            card.style.opacity = '0';
+                            card.style.transform = 'scale(0.8)';
+                            
+                            setTimeout(() => {
+                                card.remove();
+                                
+                                // Обновляем счетчик
+                                const badge = document.querySelector('.bubble-card-header .badge');
+                                const count = parseInt(badge.textContent) - 1;
+                                badge.textContent = count;
+                                
+                                // Если элементов не осталось, показываем заглушку
+                                if (count === 0) {
+                                    const cardBody = document.querySelector('.bubble-card-body');
+                                    cardBody.innerHTML = `
+                                        <div class="empty-state text-center py-5">
+                                            <div class="empty-state-icon">
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <h5>{% trans "У вас пока нет избранных элементов" %}</h5>
+                                            <p class="text-muted">{% trans "Добавляйте интересные химические элементы в избранное, чтобы вернуться к ним позже" %}</p>
+                                            <a href="{% url 'chemistry:element_list' %}" class="btn bubble-btn mt-3">
+                                                <i class="fas fa-flask"></i> {% trans "Просмотреть элементы" %}
+                                            </a>
+                                        </div>
+                                    `;
+                                }
+                            }, 300);
+                        } else {
+                            alert(data.message || '{% trans "Произошла ошибка при удалении элемента из избранного" %}');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('{% trans "Произошла ошибка при удалении элемента из избранного" %}');
+                    });
+                }
+            });
+        });
+        
+        // Функция для получения CSRF-токена из куки
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endif %}
+{% endblock %} 

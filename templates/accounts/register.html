@@ -1,0 +1,87 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Регистрация" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="bubble-card p-4">
+                <h2 class="bubble-section-title text-center mb-4">{% trans "Регистрация нового аккаунта" %}</h2>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">{% trans "Имя пользователя" %}</label>
+                        <input type="text" name="username" id="id_username" class="form-control {% if form.username.errors %}is-invalid{% endif %}" value="{{ form.username.value|default_if_none:'' }}" required>
+                        {% if form.username.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.username.errors.0 }}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{% trans "Обязательное поле. 150 символов или меньше. Только буквы, цифры и символы @/./+/-/_." %}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">{% trans "Email" %}</label>
+                        <input type="email" name="email" id="id_email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" value="{{ form.email.value|default_if_none:'' }}" required>
+                        {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.email.errors.0 }}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{% trans "Введите ваш действующий адрес электронной почты" %}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_password1" class="form-label">{% trans "Пароль" %}</label>
+                        <input type="password" name="password1" id="id_password1" class="form-control {% if form.password1.errors %}is-invalid{% endif %}" required>
+                        {% if form.password1.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.password1.errors.0 }}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <ul>
+                                <li>{% trans "Ваш пароль не должен совпадать с вашим именем или другой персональной информацией." %}</li>
+                                <li>{% trans "Ваш пароль должен содержать как минимум 8 символов." %}</li>
+                                <li>{% trans "Ваш пароль не должен быть слишком простым и распространенным." %}</li>
+                                <li>{% trans "Ваш пароль не может состоять только из цифр." %}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="id_password2" class="form-label">{% trans "Подтверждение пароля" %}</label>
+                        <input type="password" name="password2" id="id_password2" class="form-control {% if form.password2.errors %}is-invalid{% endif %}" required>
+                        {% if form.password2.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.password2.errors.0 }}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{% trans "Введите тот же пароль, что и выше, для подтверждения." %}</div>
+                    </div>
+                    
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn bubble-btn btn-lg">
+                            <i class="fas fa-user-plus me-2"></i> {% trans "Зарегистрироваться" %}
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p>{% trans "Уже есть аккаунт?" %}</p>
+                    <a href="{% url 'accounts:login' %}" class="btn bubble-btn-secondary">
+                        <i class="fas fa-sign-in-alt me-2"></i> {% trans "Войти" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

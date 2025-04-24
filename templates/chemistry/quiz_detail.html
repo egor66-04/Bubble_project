@@ -1,0 +1,263 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ quiz.title }} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="quiz-detail-header text-center mb-4">
+                <h1 class="bubble-section-title">{{ quiz.title }}</h1>
+                <div class="quiz-difficulty-badge">
+                    <span class="badge rounded-pill 
+                        {% if quiz.level <= 2 %}bg-success
+                        {% elif quiz.level <= 5 %}bg-warning
+                        {% else %}bg-danger{% endif %} fs-5 px-3 py-2">
+                        {% trans "Уровень сложности:" %} {{ quiz.level }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Информация о тесте -->
+                <div class="col-md-8">
+                    <div class="bubble-card mb-4">
+                        <div class="bubble-card-header">
+                            <h2 class="h4 mb-0">{% trans "Информация о тесте" %}</h2>
+                        </div>
+                        <div class="bubble-card-body">
+                            <div class="quiz-icon text-center mb-3">
+                                <i class="{% if quiz.icon %}{{ quiz.icon }}{% else %}fas fa-atom{% endif %} fa-4x"></i>
+                            </div>
+                            
+                            <p class="quiz-description mb-4">{{ quiz.description }}</p>
+                            
+                            <div class="quiz-stats">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="quiz-stat-item text-center">
+                                            <div class="quiz-stat-icon">
+                                                <i class="fas fa-list-ol"></i>
+                                            </div>
+                                            <div class="quiz-stat-value">{{ quiz.questions.count }}</div>
+                                            <div class="quiz-stat-label">{% trans "Вопросов" %}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="quiz-stat-item text-center">
+                                            <div class="quiz-stat-icon">
+                                                <i class="fas fa-clock"></i>
+                                            </div>
+                                            <div class="quiz-stat-value">{{ quiz.time_limit }}</div>
+                                            <div class="quiz-stat-label">{% trans "Минут" %}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="quiz-stat-item text-center">
+                                            <div class="quiz-stat-icon">
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <div class="quiz-stat-value">{{ quiz.max_points }}</div>
+                                            <div class="quiz-stat-label">{% trans "Макс. баллов" %}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a href="{% url 'chemistry:take_quiz' quiz.id %}" class="btn bubble-btn btn-lg">
+                                    <i class="fas fa-play-circle me-2"></i> {% trans "Начать тест" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bubble-card">
+                        <div class="bubble-card-header">
+                            <h2 class="h4 mb-0">{% trans "Советы для прохождения" %}</h2>
+                        </div>
+                        <div class="bubble-card-body">
+                            <ul class="quiz-tips">
+                                <li><i class="fas fa-lightbulb me-2"></i> {% trans "Внимательно читайте вопросы - иногда важны мелкие детали." %}</li>
+                                <li><i class="fas fa-lightbulb me-2"></i> {% trans "На каждый вопрос есть только один правильный ответ." %}</li>
+                                <li><i class="fas fa-lightbulb me-2"></i> {% trans "Если не знаете ответ на какой-то вопрос, пропустите его и вернитесь позже." %}</li>
+                                <li><i class="fas fa-lightbulb me-2"></i> {% trans "После завершения теста вы увидите свои результаты и правильные ответы." %}</li>
+                                <li><i class="fas fa-lightbulb me-2"></i> {% trans "За каждый правильный ответ вы получите очки опыта (XP), которые помогут повысить ваш уровень." %}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Статистика прохождения -->
+                <div class="col-md-4">
+                    <div class="bubble-card">
+                        <div class="bubble-card-header">
+                            <h2 class="h4 mb-0">{% trans "Ваши результаты" %}</h2>
+                        </div>
+                        <div class="bubble-card-body">
+                            {% if previous_results %}
+                                <div class="best-result mb-4">
+                                    <h3 class="h5">{% trans "Лучший результат:" %}</h3>
+                                    {% with best_result=previous_results.0 %}
+                                    <div class="result-score-card text-center p-3 mb-3">
+                                        <div class="result-score">
+                                            {{ best_result.score }}/{{ best_result.max_score }}
+                                        </div>
+                                        <div class="result-percent">
+                                            {{ best_result.score|floatformat:0 }}%
+                                        </div>
+                                        <div class="result-date">
+                                            {{ best_result.completed_at|date:"d.m.Y" }}
+                                        </div>
+                                    </div>
+                                    {% endwith %}
+                                </div>
+                                
+                                <h3 class="h5">{% trans "История прохождений:" %}</h3>
+                                <div class="results-history">
+                                    {% for result in previous_results %}
+                                        <div class="result-history-item">
+                                            <div class="result-date">{{ result.completed_at|date:"d.m.Y H:i" }}</div>
+                                            <div class="result-progress">
+                                                <div class="progress">
+                                                    <div class="progress-bar 
+                                                        {% if result.score > result.max_score|floatformat:0 %}bg-success
+                                                        {% elif result.score > result.max_score|floatformat:0 %}bg-warning
+                                                        {% else %}bg-danger{% endif %}" 
+                                                        role="progressbar" 
+                                                        style="width: {{ result.score|floatformat:0 }}%" 
+                                                        aria-valuenow="{{ result.score }}" 
+                                                        aria-valuemin="0" 
+                                                        aria-valuemax="{{ result.max_score }}">
+                                                        {{ result.score }}/{{ result.max_score }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="no-results text-center py-4">
+                                    <div class="no-results-icon mb-3">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                    <h3 class="h5">{% trans "Нет прохождений" %}</h3>
+                                    <p class="text-muted">{% trans "Вы еще не проходили этот тест. Будьте первым!" %}</p>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="text-center mt-4">
+                                <a href="{% url 'chemistry:quiz_list' %}" class="btn bubble-outline-btn">
+                                    <i class="fas fa-arrow-left me-2"></i> {% trans "К списку тестов" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-detail-header {
+        margin-bottom: 30px;
+    }
+    
+    .quiz-difficulty-badge {
+        margin-top: 10px;
+    }
+    
+    .quiz-icon {
+        color: var(--bubble-primary);
+    }
+    
+    .quiz-stats {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .quiz-stat-item {
+        padding: 15px 10px;
+    }
+    
+    .quiz-stat-icon {
+        font-size: 1.5rem;
+        color: var(--bubble-primary);
+        margin-bottom: 5px;
+    }
+    
+    .quiz-stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+    
+    .quiz-stat-label {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .quiz-tips {
+        padding-left: 15px;
+    }
+    
+    .quiz-tips li {
+        margin-bottom: 15px;
+    }
+    
+    .result-score-card {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+    }
+    
+    .result-score {
+        font-size: 2rem;
+        font-weight: bold;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+    
+    .result-percent {
+        font-size: 1.2rem;
+        color: var(--bubble-primary);
+        margin-bottom: 5px;
+    }
+    
+    .result-date {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .results-history {
+        margin-top: 15px;
+    }
+    
+    .result-history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .result-progress {
+        flex-grow: 1;
+        margin-left: 15px;
+    }
+    
+    .no-results-icon {
+        font-size: 3rem;
+        color: #ccc;
+    }
+</style>
+{% endblock %} 

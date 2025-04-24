@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bubble{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if user.is_authenticated %}user-authenticated{% endif %}">
+    <div class="bubble-wrapper">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg bubble-navbar">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'home' %}">
+                    <img src="{% static 'images/bubble-logo.png' %}" alt="Bubble Logo" class="bubble-logo">
+                    <span class="bubble-title">Bubble</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
+                                <i class="fas fa-home"></i> {% trans "Главная" %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/chemistry/periodic-table/' in request.path %}active{% endif %}" href="{% url 'chemistry:periodic_table' %}">
+                                <i class="fas fa-table"></i> {% trans "Таблица Менделеева" %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/chemistry/elements/' in request.path %}active{% endif %}" href="{% url 'chemistry:element_list' %}">
+                                <i class="fas fa-flask"></i> {% trans "Элементы" %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/chemistry/reactions/' in request.path %}active{% endif %}" href="{% url 'chemistry:reaction_list' %}">
+                                <i class="fas fa-atom"></i> {% trans "Реакции" %}
+                            </a>
+                        </li>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/chemistry/quizzes/' in request.path %}active{% endif %}" href="{% url 'chemistry:quiz_list' %}">
+                                <i class="fas fa-question-circle"></i> {% trans "Викторины" %}
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/about/' in request.path %}active{% endif %}" href="{% url 'about' %}">
+                                <i class="fas fa-info-circle"></i> {% trans "О нас" %}
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Поиск -->
+                    <form class="d-flex me-3" action="{% url 'chemistry:chemistry_search' %}" method="GET">
+                        <div class="bubble-search">
+                            <input class="form-control me-2" type="search" name="q" placeholder="{% trans 'Поиск элементов...' %}" aria-label="Search">
+                            <button class="btn btn-search" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Аутентификация -->
+                    <div class="navbar-auth">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn bubble-btn dropdown-toggle" type="button" id="dropdownMenuUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="avatar-small">
+                                {% else %}
+                                <i class="fas fa-user-circle"></i>
+                                {% endif %}
+                                <span class="d-none d-md-inline">{{ user.username }}</span>
+                                <span class="badge bg-primary ms-1">Lvl {{ user.level }}</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuUser">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                    <i class="fas fa-user"></i> {% trans "Профиль" %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:achievements' %}">
+                                    <i class="fas fa-trophy"></i> {% trans "Достижения" %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:favorite_elements' %}">
+                                    <i class="fas fa-star"></i> {% trans "Избранное" %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:learning_progress' %}">
+                                    <i class="fas fa-chart-line"></i> {% trans "Прогресс" %}
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% if not user.is_subscribed %}
+                                <li><a class="dropdown-item" href="{% url 'accounts:subscription' %}">
+                                    <i class="fas fa-crown"></i> {% trans "Купить подписку" %}
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                                    <i class="fas fa-sign-out-alt"></i> {% trans "Выйти" %}
+                                </a></li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn bubble-btn me-2">
+                            <i class="fas fa-sign-in-alt"></i> {% trans "Войти" %}
+                        </a>
+                        <a href="{% url 'accounts:register' %}" class="btn bubble-btn-secondary">
+                            <i class="fas fa-user-plus"></i> {% trans "Регистрация" %}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Сообщения -->
+        {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} bubble-alert alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Контент страницы -->
+        <main class="content-wrapper py-4">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Кнопка озвучки -->
+        <button id="tts-toggle" class="btn bubble-btn-floating" title="{% trans 'Включить/выключить озвучку' %}">
+            <i class="fas fa-volume-up"></i>
+        </button>
+
+        <!-- Footer -->
+        <footer class="bubble-footer py-4">
+            <div class="container">
+                <div class="row gy-4">
+                    <div class="col-md-4">
+                        <h5 class="bubble-footer-title">{% trans "О проекте" %}</h5>
+                        <p>{% trans "Bubble — интерактивный образовательный проект, посвященный изучению химии." %}</p>
+                        <a href="{% url 'about' %}" class="btn bubble-btn-outline btn-sm">
+                            <i class="fas fa-info-circle me-1"></i> {% trans "Подробнее" %}
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="bubble-footer-title">{% trans "Навигация" %}</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="{% url 'home' %}">{% trans "Главная" %}</a></li>
+                            <li><a href="{% url 'chemistry:periodic_table' %}">{% trans "Таблица Менделеева" %}</a></li>
+                            <li><a href="{% url 'chemistry:element_list' %}">{% trans "Элементы" %}</a></li>
+                            <li><a href="{% url 'chemistry:reaction_list' %}">{% trans "Реакции" %}</a></li>
+                            <li><a href="{% url 'about' %}">{% trans "О нас" %}</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="bubble-footer-title">{% trans "Присоединяйтесь к нам" %}</h5>
+                        <p>{% trans "Подпишитесь на наш Telegram-канал, чтобы быть в курсе всех обновлений:" %}</p>
+                        <a href="https://t.me/bubbleproekt" target="_blank" class="btn bubble-btn-secondary">
+                            <i class="fab fa-telegram"></i> @bubbleproekt
+                        </a>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <p class="mb-0">© 2025 Bubble. {% trans "Все права защищены." %}</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Web Speech API для озвучивания -->
+    <script src="{% static 'js/tts.js' %}"></script>
+    <!-- Основной JS файл -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

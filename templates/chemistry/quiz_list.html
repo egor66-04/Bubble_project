@@ -1,0 +1,292 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Викторины по химии" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="quiz-intro mb-5">
+        <h1 class="bubble-section-title text-center mb-3">{% trans "Викторины по химии" %}</h1>
+        <p class="lead text-center mb-5">{% trans "Проверьте свои знания и получите опыт за правильные ответы!" %}</p>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="bubble-card">
+                <div class="bubble-card-header">
+                    <h3><i class="fas fa-question-circle me-2"></i> {% trans "Доступные викторины" %}</h3>
+                </div>
+                <div class="bubble-card-body">
+                    {% if quizzes %}
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            {% for quiz in quizzes %}
+                                <div class="col">
+                                    <div class="quiz-card {% if quiz.level > user_level %}quiz-locked{% endif %}">
+                                        <div class="quiz-difficulty">
+                                            <span class="badge rounded-pill 
+                                                {% if quiz.level <= 2 %}bg-success
+                                                {% elif quiz.level <= 5 %}bg-warning
+                                                {% else %}bg-danger{% endif %}">
+                                                {% trans "Уровень" %} {{ quiz.level }}
+                                            </span>
+                                            {% if quiz.id in completed_quizzes %}
+                                                <span class="badge rounded-pill bg-info ms-2">
+                                                    <i class="fas fa-check"></i> {% trans "Пройдено" %}
+                                                </span>
+                                            {% endif %}
+                                            {% if quiz.level > user_level %}
+                                                <span class="badge rounded-pill bg-secondary ms-2">
+                                                    <i class="fas fa-lock"></i> {% trans "Заблокировано" %}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="quiz-icon">
+                                            <i class="{% if quiz.icon %}{{ quiz.icon }}{% else %}fas fa-atom{% endif %}"></i>
+                                        </div>
+                                        <h4 class="quiz-title">{{ quiz.title }}</h4>
+                                        <div class="quiz-details">
+                                            <div class="quiz-detail-item">
+                                                <i class="fas fa-list-ol me-1"></i>
+                                                <span>{{ quiz.questions.count }} {% trans "вопросов" %}</span>
+                                            </div>
+                                            <div class="quiz-detail-item">
+                                                <i class="fas fa-clock me-1"></i>
+                                                <span>{{ quiz.time_limit|default:"10" }} {% trans "мин" %}</span>
+                                            </div>
+                                            <div class="quiz-detail-item">
+                                                <i class="fas fa-star me-1"></i>
+                                                <span>{{ quiz.max_points|default:"10" }} XP</span>
+                                            </div>
+                                        </div>
+                                        <p class="quiz-description">{{ quiz.description|truncatechars:120 }}</p>
+                                        {% if quiz.level <= user_level %}
+                                            <a href="{% url 'chemistry:quiz_detail' quiz.id %}" class="btn bubble-btn w-100">
+                                                {% if quiz.id in completed_quizzes %}
+                                                    <i class="fas fa-redo me-2"></i> {% trans "Пройти снова" %}
+                                                {% else %}
+                                                    <i class="fas fa-play me-2"></i> {% trans "Начать тест" %}
+                                                {% endif %}
+                                            </a>
+                                        {% else %}
+                                            <button class="btn bubble-btn-disabled w-100" disabled>
+                                                <i class="fas fa-lock me-2"></i> {% trans "Недоступно" %} 
+                                                <small>({% trans "требуется уровень" %} {{ quiz.level }})</small>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state text-center py-5">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-dizzy"></i>
+                            </div>
+                            <h5>{% trans "Нет доступных викторин" %}</h5>
+                            <p class="text-muted">{% trans "Продолжайте изучать элементы, чтобы открыть новые тесты и викторины!" %}</p>
+                            <a href="{% url 'chemistry:element_list' %}" class="btn bubble-btn mt-3">
+                                <i class="fas fa-flask"></i> {% trans "Изучать элементы" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="bubble-card mb-4">
+                <div class="bubble-card-header">
+                    <h4><i class="fas fa-trophy me-2"></i> {% trans "Ваш прогресс" %}</h4>
+                </div>
+                <div class="bubble-card-body">
+                    <div class="level-display text-center mb-3">
+                        <div class="current-level">
+                            <span class="level-number">{{ user.level }}</span>
+                            <span class="level-label">{% trans "Уровень" %}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="quiz-progress-stats">
+                        <div class="progress-stat">
+                            <div class="stat-label">{% trans "Доступно викторин" %}</div>
+                            <div class="stat-value">{{ quizzes|length }}</div>
+                        </div>
+                        <div class="progress-stat">
+                            <div class="stat-label">{% trans "Пройдено викторин" %}</div>
+                            <div class="stat-value">{{ completed_quizzes|length }}</div>
+                        </div>
+                        <div class="progress-stat">
+                            <div class="stat-label">{% trans "Процент завершения" %}</div>
+                            <div class="stat-value">
+                                {% if quizzes|length > 0 %}
+                                    {{ completed_quizzes|length|floatformat:0 }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bubble-card">
+                <div class="bubble-card-header">
+                    <h4><i class="fas fa-info-circle me-2"></i> {% trans "Как это работает" %}</h4>
+                </div>
+                <div class="bubble-card-body">
+                    <ul class="how-it-works">
+                        <li>
+                            <i class="fas fa-check-circle text-success"></i>
+                            <span>{% trans "Проходите викторины и получайте опыт (XP)" %}</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-level-up-alt text-primary"></i>
+                            <span>{% trans "Повышайте свой уровень, чтобы открыть новые тесты" %}</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-medal text-warning"></i>
+                            <span>{% trans "Получайте достижения за прохождение всех тестов на высокие баллы" %}</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-brain text-info"></i>
+                            <span>{% trans "Закрепляйте знания о химических элементах и реакциях" %}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .quiz-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .quiz-locked {
+        background-color: #f8f9fa;
+        opacity: 0.85;
+    }
+    
+    .quiz-locked:hover {
+        transform: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .quiz-locked .quiz-icon {
+        color: #adb5bd;
+    }
+    
+    .bubble-btn-disabled {
+        background-color: #e9ecef;
+        color: #6c757d;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: not-allowed;
+    }
+    
+    .quiz-icon {
+        font-size: 3rem;
+        color: var(--bubble-primary);
+        text-align: center;
+        margin-bottom: 15px;
+        margin-top: 10px;
+    }
+    
+    .quiz-title {
+        font-size: 1.3rem;
+        text-align: center;
+        margin-bottom: 15px;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .quiz-difficulty {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .quiz-details {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .quiz-description {
+        margin-bottom: 20px;
+        min-height: 60px;
+        color: #666;
+        font-size: 0.95rem;
+    }
+    
+    .quiz-progress-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .progress-stat {
+        background-color: #f5f8ff;
+        padding: 15px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--bubble-primary);
+    }
+    
+    .how-it-works {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .how-it-works li {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .how-it-works li:last-child {
+        border-bottom: none;
+    }
+    
+    .how-it-works li i {
+        margin-right: 10px;
+        width: 25px;
+        text-align: center;
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,59 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Вход в аккаунт" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="bubble-card p-4">
+                <h2 class="bubble-section-title text-center mb-4">{% trans "Вход в аккаунт" %}</h2>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">{% trans "Имя пользователя" %}</label>
+                        <input type="text" name="username" id="id_username" maxlength="150" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">{% trans "Пароль" %}</label>
+                        <input type="password" name="password" id="id_password" class="form-control" required>
+                    </div>
+                    
+                    {% if form.errors %}
+                    <div class="alert bubble-alert alert-danger mb-3">
+                        <p class="mb-0">{% trans "Пожалуйста, введите правильные имя пользователя и пароль. Оба поля могут быть чувствительны к регистру." %}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn bubble-btn btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i> {% trans "Войти" %}
+                        </button>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{% url 'accounts:password_reset' %}" class="text-decoration-none">
+                            {% trans "Забыли пароль?" %}
+                        </a>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p>{% trans "Еще нет аккаунта?" %}</p>
+                    <a href="{% url 'accounts:register' %}" class="btn bubble-btn-secondary">
+                        <i class="fas fa-user-plus me-2"></i> {% trans "Зарегистрироваться" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

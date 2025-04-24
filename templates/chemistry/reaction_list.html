@@ -1,0 +1,517 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Химические реакции" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="reaction-intro mb-5">
+        <h1 class="bubble-section-title text-center mb-3">{% trans "Химические реакции" %}</h1>
+        <p class="lead text-center mb-5">{% trans "Изучайте взаимодействие химических элементов и результаты их соединения" %}</p>
+    </div>
+    
+    <!-- Интерактивная секция для соединения элементов -->
+    <div class="interactive-reaction mb-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title h5 mb-0">{% trans "Создайте свою реакцию" %}</h3>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="reaction-builder d-flex align-items-center justify-content-center mb-4">
+                            <div class="reaction-area d-flex align-items-center">
+                                <div class="element-slot" id="element-slot-1">
+                                    <div class="empty-slot">?</div>
+                                </div>
+                                <div class="reaction-sign">+</div>
+                                <div class="element-slot" id="element-slot-2">
+                                    <div class="empty-slot">?</div>
+                                </div>
+                                <div class="reaction-arrow">
+                                    <i class="fas fa-arrow-right fa-2x"></i>
+                                </div>
+                                <div class="reaction-result">
+                                    <div class="empty-result">?</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mb-3">
+                            <button class="btn bubble-btn reset-reaction-btn">
+                                <i class="fas fa-redo me-2"></i> {% trans "Начать заново" %}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="instructions">
+                            <h4 class="h6">{% trans "Как это работает:" %}</h4>
+                            <ol class="small">
+                                <li>{% trans "Выберите два элемента из списка ниже" %}</li>
+                                <li>{% trans "Смотрите результат их взаимодействия" %}</li>
+                                <li>{% trans "Изучайте формулу и описание реакции" %}</li>
+                            </ol>
+                            
+                            <div class="alert alert-info small">
+                                <i class="fas fa-info-circle me-2"></i>
+                                {% trans "Некоторые элементы не вступают в реакцию друг с другом" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="available-elements">
+                    <h4 class="h6 mb-3">{% trans "Доступные элементы:" %}</h4>
+                    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-3">
+                        {% for element in elements %}
+                        <div class="col">
+                            <div class="element-card-small" data-element-id="{{ element.id }}" style="background-color: {{ element.category.color }}">
+                                <div class="element-symbol">{{ element.symbol }}</div>
+                                <div class="element-name">{{ element.name }}</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <div class="alert alert-warning">
+                                {% trans "Элементы не найдены. Пожалуйста, добавьте элементы через админ-панель." %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="reaction-display mt-4" style="display: none;">
+                    <h4 class="h6 mb-3">{% trans "Результат реакции:" %}</h4>
+                    <div class="reaction-result-display p-3 border rounded">
+                        <h5 class="reaction-result-title"></h5>
+                        <div class="reaction-result-formula font-monospace"></div>
+                        <p class="reaction-result-description mt-2"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Список всех реакций -->
+    <div class="all-reactions mb-4">
+        <h3 class="h4 mb-3">{% trans "Доступные реакции" %}</h3>
+        <div class="row g-4">
+            {% for reaction in reactions %}
+            <div class="col-md-6">
+                <div class="reaction-card">
+                    <a href="{% url 'chemistry:reaction_detail' reaction.id %}">
+                        <div class="reaction-title">{{ reaction.name }}</div>
+                        <div class="reaction-equation">
+                            {% for reactant in reaction.reactants.all %}
+                            {% if not forloop.first %} + {% endif %}
+                            <span class="element-symbol">{{ reactant.symbol }}</span>
+                            {% endfor %}
+                            <span class="reaction-arrow">→</span>
+                            {% for product in reaction.products.all %}
+                            {% if not forloop.first %} + {% endif %}
+                            <span class="element-symbol">{{ product.symbol }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="reaction-type">{{ reaction.reaction_type }}</div>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="alert bubble-alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    {% trans "Реакции не найдены." %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Пагинация (если потребуется) -->
+        {% if reactions.has_other_pages %}
+        <nav aria-label="Pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if reactions.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="First">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ reactions.previous_page_number }}" aria-label="Previous">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in reactions.paginator.page_range %}
+                    {% if reactions.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > reactions.number|add:'-3' and num < reactions.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if reactions.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ reactions.next_page_number }}" aria-label="Next">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ reactions.paginator.num_pages }}" aria-label="Last">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reaction-builder {
+        min-height: 200px;
+    }
+    
+    .reaction-area {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .element-slot {
+        width: 80px;
+        height: 80px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background-color: #f8f9fa;
+    }
+    
+    .empty-slot, .empty-result {
+        font-size: 2rem;
+        color: #adb5bd;
+    }
+    
+    .filled-slot {
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+    
+    .filled-slot .element-symbol {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+    
+    .reaction-sign, .reaction-arrow {
+        font-size: 1.5rem;
+        color: #6c757d;
+    }
+    
+    .reaction-result {
+        width: 100px;
+        height: 100px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background-color: #f8f9fa;
+    }
+    
+    .reaction-product {
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+    
+    .water {
+        background-color: #3498db;
+    }
+    
+    .salt {
+        background-color: #f39c12;
+    }
+    
+    .carbon-dioxide {
+        background-color: #34495e;
+    }
+    
+    .no-reaction {
+        background-color: #e74c3c;
+    }
+    
+    .element-card-small {
+        border-radius: 10px;
+        padding: 8px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .element-card-small:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .element-card-small.selected {
+        box-shadow: 0 0 0 3px #3498db, 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .element-card-small .element-symbol {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .element-card-small .element-name {
+        font-size: 0.8rem;
+    }
+    
+    .reaction-card {
+        border-radius: 10px;
+        background-color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .reaction-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .reaction-card a {
+        display: block;
+        padding: 20px;
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .reaction-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .reaction-equation {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        text-align: center;
+    }
+    
+    .reaction-type {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .reaction-arrow {
+        margin: 0 10px;
+        color: #3498db;
+    }
+    
+    @media (max-width: 768px) {
+        .reaction-area {
+            gap: 10px;
+        }
+        
+        .element-slot {
+            width: 70px;
+            height: 70px;
+        }
+        
+        .reaction-result {
+            width: 80px;
+            height: 80px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Элементы интерфейса
+        const elementSlots = document.querySelectorAll('.element-slot');
+        const elementCards = document.querySelectorAll('.element-card-small');
+        const resetButton = document.querySelector('.reset-reaction-btn');
+        const reactionDisplay = document.querySelector('.reaction-display');
+        const reactionResultTitle = document.querySelector('.reaction-result-title');
+        const reactionResultFormula = document.querySelector('.reaction-result-formula');
+        const reactionResultDescription = document.querySelector('.reaction-result-description');
+        
+        // Хранение выбранных элементов
+        let selectedElements = [];
+        
+        // Определение возможных реакций
+        // В реальном приложении эти данные будут приходить с сервера
+        const reactionDatabase = [
+            {
+                reactants: ['H', 'O'],
+                name: 'Образование воды',
+                formula: '2H₂ + O₂ → 2H₂O',
+                description: 'При соединении водорода и кислорода образуется вода. Эта реакция экзотермическая и выделяет большое количество тепла.'
+            },
+            {
+                reactants: ['Na', 'Cl'],
+                name: 'Образование поваренной соли',
+                formula: '2Na + Cl₂ → 2NaCl',
+                description: 'При взаимодействии натрия и хлора образуется хлорид натрия (поваренная соль). Реакция протекает очень бурно.'
+            },
+            {
+                reactants: ['C', 'O'],
+                name: 'Горение углерода',
+                formula: 'C + O₂ → CO₂',
+                description: 'При сгорании углерода в кислороде образуется углекислый газ. Эта реакция лежит в основе многих процессов горения.'
+            }
+        ];
+        
+        // Добавляем обработчики клика на карточки элементов
+        elementCards.forEach(card => {
+            card.addEventListener('click', function() {
+                if (selectedElements.length < 2) {
+                    const elementId = this.getAttribute('data-element-id');
+                    const elementSymbol = this.querySelector('.element-symbol').textContent;
+                    const elementName = this.querySelector('.element-name').textContent;
+                    
+                    // Добавляем в выбранные, если его там еще нет
+                    if (!selectedElements.some(e => e.id === elementId)) {
+                        selectedElements.push({
+                            id: elementId,
+                            symbol: elementSymbol,
+                            name: elementName,
+                            color: this.style.backgroundColor
+                        });
+                        
+                        // Визуально отмечаем элемент как выбранный
+                        this.classList.add('selected');
+                        
+                        // Обновляем отображение выбранных элементов
+                        updateElementSlots();
+                        
+                        // Если выбрано два элемента, проверяем реакцию
+                        if (selectedElements.length === 2) {
+                            checkReaction();
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Обработчик кнопки сброса
+        resetButton.addEventListener('click', function() {
+            // Сбрасываем выбранные элементы
+            selectedElements = [];
+            
+            // Обновляем отображение
+            updateElementSlots();
+            
+            // Скрываем результат реакции
+            reactionDisplay.style.display = 'none';
+            
+            // Сбрасываем выделение элементов
+            elementCards.forEach(card => card.classList.remove('selected'));
+
+            // Сбрасываем результат реакции
+            const resultElement = document.querySelector('.reaction-result');
+            resultElement.innerHTML = '<div class="empty-result">?</div>';
+        });
+        
+        // Обновление отображения выбранных элементов
+        function updateElementSlots() {
+            elementSlots.forEach((slot, index) => {
+                if (selectedElements[index]) {
+                    const element = selectedElements[index];
+                    slot.innerHTML = `
+                        <div class="filled-slot" style="background-color: ${element.color}">
+                            <div class="element-symbol">${element.symbol}</div>
+                            <div class="element-name small">${element.name}</div>
+                        </div>
+                    `;
+                } else {
+                    slot.innerHTML = '<div class="empty-slot">?</div>';
+                }
+            });
+        }
+        
+        // Проверка возможной реакции
+        function checkReaction() {
+            const element1 = selectedElements[0].symbol;
+            const element2 = selectedElements[1].symbol;
+            
+            // Проверяем, есть ли реакция между этими элементами
+            const reaction = reactionDatabase.find(r => {
+                const reactants = r.reactants;
+                return (reactants.includes(element1) && reactants.includes(element2));
+            });
+            
+            if (reaction) {
+                // Показываем информацию о реакции
+                reactionResultTitle.textContent = reaction.name;
+                reactionResultFormula.textContent = reaction.formula;
+                reactionResultDescription.textContent = reaction.description;
+                reactionDisplay.style.display = 'block';
+                
+                // Визуализируем результат реакции
+                const resultElement = document.querySelector('.reaction-result');
+                if (reaction.formula.includes('H₂O')) {
+                    resultElement.innerHTML = '<div class="reaction-product water">H<sub>2</sub>O</div>';
+                } else if (reaction.formula.includes('NaCl')) {
+                    resultElement.innerHTML = '<div class="reaction-product salt">NaCl</div>';
+                } else if (reaction.formula.includes('CO₂')) {
+                    resultElement.innerHTML = '<div class="reaction-product carbon-dioxide">CO<sub>2</sub></div>';
+                } else {
+                    resultElement.innerHTML = '<div class="reaction-product">?</div>';
+                }
+            } else {
+                // Нет реакции между этими элементами
+                reactionResultTitle.textContent = 'Реакция не обнаружена';
+                reactionResultFormula.textContent = `${element1} + ${element2} → ?`;
+                reactionResultDescription.textContent = 'Между выбранными элементами не обнаружено заметной реакции при стандартных условиях.';
+                reactionDisplay.style.display = 'block';
+                
+                // Показываем, что реакции нет
+                const resultElement = document.querySelector('.reaction-result');
+                resultElement.innerHTML = '<div class="reaction-product no-reaction"><i class="fas fa-times"></i></div>';
+            }
+        }
+    });
+</script>
+{% endblock %} 

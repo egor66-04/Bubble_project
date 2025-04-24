@@ -1,0 +1,686 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ element.name }} ({{ element.symbol }}) - {% trans "Химический элемент" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">{% trans "Главная" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'chemistry:element_list' %}">{% trans "Элементы" %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ element.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="element-title-block mb-4">
+        <h1 class="element-title">
+            <span class="element-symbol">{{ element.symbol }}</span>
+            <span class="element-name">{{ element.name }}</span>
+        </h1>
+        <p class="element-subtitle">{% trans "Атомный номер" %}: {{ element.atomic_number }}</p>
+        {% if user.is_authenticated %}
+            <button id="favoriteBtn" class="btn btn-outline-primary" 
+                    data-element-id="{{ element.id }}" 
+                    data-is-favorite="{{ is_favorite|lower }}">
+                {% if is_favorite %}
+                    <i class="fas fa-heart me-2"></i> {% trans "В избранном" %}
+                {% else %}
+                    <i class="far fa-heart me-2"></i> {% trans "В избранное" %}
+                {% endif %}
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card element-card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Атомный номер" %}:</span>
+                                <span class="property-value">{{ element.atomic_number }}</span>
+                            </div>
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Символ" %}:</span>
+                                <span class="property-value">{{ element.symbol }}</span>
+                            </div>
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Название" %}:</span>
+                                <span class="property-value">{{ element.name }}</span>
+                            </div>
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Атомная масса" %}:</span>
+                                <span class="property-value">{{ element.atomic_weight }} u</span>
+                            </div>
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Категория" %}:</span>
+                                <span class="property-value" style="color: {{ element.category.color }}">{{ element.category.name }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Период" %}:</span>
+                                <span class="property-value">{{ element.period }}</span>
+                            </div>
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Группа" %}:</span>
+                                <span class="property-value">{{ element.group }}</span>
+                            </div>
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Плотность" %}:</span>
+                                <span class="property-value">{{ element.density|default:"—" }} g/cm³</span>
+                            </div>
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Агрегатное состояние" %}:</span>
+                                <span class="property-value">
+                                    {% if element.state == 'solid' %}
+                                        {% trans "Твёрдое" %}
+                                    {% elif element.state == 'liquid' %}
+                                        {% trans "Жидкое" %}
+                                    {% elif element.state == 'gas' %}
+                                        {% trans "Газообразное" %}
+                                    {% else %}
+                                        {% trans "Неизвестно" %}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card element-card mb-4">
+                <div class="card-header">
+                    <h3>{% trans "Физические свойства" %}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Температура плавления" %}:</span>
+                                <span class="property-value">{{ element_detail.melting_point|default:"—" }} K</span>
+                            </div>
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Температура кипения" %}:</span>
+                                <span class="property-value">{{ element_detail.boiling_point|default:"—" }} K</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Теплопроводность" %}:</span>
+                                <span class="property-value">{{ element_detail.thermal_conductivity|default:"—" }} W/(m·K)</span>
+                            </div>
+                            <div class="element-property">
+                                <span class="property-label">{% trans "Электроотрицательность" %}:</span>
+                                <span class="property-value">{{ element_detail.electronegativity|default:"—" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card element-card mb-4">
+                <div class="card-header">
+                    <h3>{% trans "Электронная конфигурация" %}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="electron-config">
+                        <p class="config-notation">{{ element_detail.electron_configuration|default:"Нет данных" }}</p>
+                        {% if element_detail.electron_shell_image %}
+                            <img src="{{ element_detail.electron_shell_image.url }}" alt="{{ element.name }} electron shells" class="img-fluid electron-shell-img">
+                        {% else %}
+                            <div class="electron-shell-placeholder">
+                                <i class="fas fa-atom"></i>
+                                <p>{% trans "Изображение электронных оболочек отсутствует" %}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card element-card mb-4">
+                <div class="card-header">
+                    <h3>{% trans "Описание" %}</h3>
+                </div>
+                <div class="card-body">
+                    {% if element_detail.description %}
+                        <div class="element-description">{{ element_detail.description|linebreaks }}</div>
+                    {% else %}
+                        <p class="text-muted">{% trans "Описание отсутствует" %}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card element-card mb-4">
+                <div class="card-header">
+                    <h3>{% trans "Применение" %}</h3>
+                </div>
+                <div class="card-body">
+                    {% if element_detail.applications %}
+                        <div class="element-applications">{{ element_detail.applications|linebreaks }}</div>
+                    {% else %}
+                        <p class="text-muted">{% trans "Информация о применении отсутствует" %}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if reactions.exists %}
+                <div class="card element-card mb-4">
+                    <div class="card-header">
+                        <h3>{% trans "Связанные реакции" %}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="element-reactions">
+                            <ul class="reaction-list">
+                                {% for reaction in reactions %}
+                                    <li class="reaction-item">
+                                        <a href="{% url 'chemistry:reaction_detail' reaction.id %}" class="reaction-link">
+                                            <span class="reaction-equation">{{ reaction.equation }}</span>
+                                        </a>
+                                        <p class="reaction-description">{{ reaction.name }}</p>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if element_detail.isotopes.exists %}
+                <div class="card element-card mb-4">
+                    <div class="card-header">
+                        <h3>{% trans "Изотопы" %}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="isotopes-table-container">
+                            <table class="table isotopes-table">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Масса" %}</th>
+                                        <th>{% trans "Распространённость" %}</th>
+                                        <th>{% trans "Стабильность" %}</th>
+                                        <th>{% trans "Период полураспада" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for isotope in element_detail.isotopes.all %}
+                                        <tr>
+                                            <td>{{ isotope.mass_number }}</td>
+                                            <td>{{ isotope.abundance|default:"—" }}%</td>
+                                            <td>
+                                                {% if isotope.is_stable %}
+                                                    <span class="badge bg-success">{% trans "Стабильный" %}</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">{% trans "Нестабильный" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ isotope.half_life|default:"—" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="card element-card mb-4">
+                <div class="card-header">
+                    <h3>{% trans "Интересные факты" %}</h3>
+                </div>
+                <div class="card-body">
+                    {% if element_detail.fun_facts %}
+                        <div class="accordion" id="funFactsAccordion">
+                            {% for fact in element_detail.get_fun_facts %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="factHeading{{ forloop.counter }}">
+                                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" 
+                                                data-bs-toggle="collapse" data-bs-target="#factCollapse{{ forloop.counter }}" 
+                                                aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                                                aria-controls="factCollapse{{ forloop.counter }}">
+                                            {% trans "Факт" %} #{{ forloop.counter }}
+                                        </button>
+                                    </h2>
+                                    <div id="factCollapse{{ forloop.counter }}" 
+                                         class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                                         aria-labelledby="factHeading{{ forloop.counter }}" 
+                                         data-bs-parent="#funFactsAccordion">
+                                        <div class="accordion-body">
+                                            {{ fact }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">{% trans "Интересные факты отсутствуют" %}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if element_detail.discovery_year %}
+                <div class="card element-card mb-4">
+                    <div class="card-header">
+                        <h3>{% trans "История открытия" %}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="element-history">
+                            <div class="history-item">
+                                <div class="history-year">{{ element_detail.discovery_year }}</div>
+                                <div class="history-content">
+                                    <h4>{% trans "Открыт" %}: {{ element_detail.discovered_by|default:"Неизвестно" }}</h4>
+                                    {% if element_detail.discovery_info %}
+                                        <p>{{ element_detail.discovery_info }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card element-card mb-4 related-elements">
+                <div class="card-header">
+                    <h3>{% trans "Похожие элементы" %}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="related-elements-grid">
+                        {% for related in related_elements %}
+                            <a href="{% url 'chemistry:element_detail' related.atomic_number %}" class="related-element-box" style="background-color: {{ related.category.color }}">
+                                <div class="element-number">{{ related.atomic_number }}</div>
+                                <div class="element-symbol">{{ related.symbol }}</div>
+                                <div class="element-name">{{ related.name }}</div>
+                            </a>
+                        {% empty %}
+                            <p class="text-muted">{% trans "Нет похожих элементов" %}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Основные стили элемента */
+    .element-title-block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .element-title {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: baseline;
+    }
+    
+    .element-symbol {
+        font-weight: bold;
+        margin-right: 1rem;
+    }
+    
+    .element-subtitle {
+        color: #6c757d;
+        font-size: 1.2rem;
+    }
+    
+    /* Стили для карточки с информацией */
+    .element-card {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .element-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .element-card .card-header {
+        background-color: var(--bubble-primary);
+        color: white;
+        padding: 1rem 1.5rem;
+    }
+    
+    .element-card .card-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    
+    .element-property {
+        margin-bottom: 0.75rem;
+    }
+    
+    .property-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .property-value {
+        margin-left: 0.5rem;
+    }
+    
+    /* Стили для электронной конфигурации */
+    .electron-config {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .config-notation {
+        font-family: monospace;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .electron-shell-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+    }
+    
+    .electron-shell-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        color: #6c757d;
+    }
+    
+    .electron-shell-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Стили для похожих элементов */
+    .related-elements-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .related-element-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        border-radius: 10px;
+        color: white;
+        text-decoration: none;
+        transition: transform 0.2s ease;
+        aspect-ratio: 1;
+    }
+    
+    .related-element-box:hover {
+        transform: scale(1.05);
+        color: white;
+    }
+    
+    .related-element-box .element-number {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+    
+    .related-element-box .element-symbol {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin: 0.25rem 0;
+    }
+    
+    .related-element-box .element-name {
+        font-size: 0.9rem;
+        text-align: center;
+    }
+    
+    /* Стили для изотопов */
+    .isotopes-table {
+        margin-bottom: 0;
+    }
+    
+    .isotopes-table-container {
+        max-height: 300px;
+        overflow-y: auto;
+        border-radius: 5px;
+    }
+    
+    /* Стили для реакций */
+    .reaction-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .reaction-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .reaction-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .reaction-link {
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--bubble-primary);
+    }
+    
+    .reaction-description {
+        margin-top: 0.5rem;
+        color: #6c757d;
+    }
+    
+    /* Стили для истории открытия */
+    .element-history {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .element-history:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 8px;
+        height: 100%;
+        width: 2px;
+        background-color: var(--bubble-primary);
+    }
+    
+    .history-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .history-year {
+        position: absolute;
+        left: -2rem;
+        background-color: var(--bubble-primary);
+        color: white;
+        padding: 0.3rem 0.6rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    
+    .history-content {
+        margin-left: 1rem;
+        padding-top: 1rem;
+    }
+    
+    .history-content h4 {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Стиль для кнопки избранного */
+    #favoriteBtn {
+        transition: all 0.3s ease;
+    }
+    
+    #favoriteBtn.favorited {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+        color: white;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .element-title {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .element-symbol {
+            margin-right: 0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .related-elements-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    /* Стиль для toast-уведомлений */
+    .bubble-toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: var(--bubble-primary);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    .bubble-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const favoriteButton = document.getElementById('favoriteBtn');
+        
+        if (favoriteButton) {
+            favoriteButton.addEventListener('click', function() {
+                const elementId = this.dataset.elementId;
+                const csrfToken = getCookie('csrftoken');
+                
+                // Отправляем запрос на сервер
+                fetch('/chemistry/api/toggle-favorite-element/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        element_id: elementId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Обновляем текст и стиль кнопки
+                        if (data.is_favorite) {
+                            favoriteButton.innerHTML = '<i class="fas fa-heart me-2"></i> {% trans "В избранном" %}';
+                            favoriteButton.classList.add('favorited');
+                            favoriteButton.dataset.isFavorite = 'true';
+                            
+                            // Показываем уведомление о добавлении в избранное
+                            showToast('{% trans "Элемент добавлен в избранное" %}');
+                        } else {
+                            favoriteButton.innerHTML = '<i class="far fa-heart me-2"></i> {% trans "В избранное" %}';
+                            favoriteButton.classList.remove('favorited');
+                            favoriteButton.dataset.isFavorite = 'false';
+                            
+                            // Показываем уведомление об удалении из избранного
+                            showToast('{% trans "Элемент удален из избранного" %}');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showToast('{% trans "Произошла ошибка. Попробуйте позже." %}', true);
+                });
+            });
+        }
+        
+        // Функция для отображения toast-уведомлений
+        function showToast(message, isError = false) {
+            // Проверяем, существует ли уже toast на странице
+            let toastElement = document.querySelector('.bubble-toast');
+            
+            // Если нет, создаем новый
+            if (!toastElement) {
+                toastElement = document.createElement('div');
+                toastElement.className = 'bubble-toast';
+                document.body.appendChild(toastElement);
+            }
+            
+            // Если это сообщение об ошибке, меняем стиль
+            if (isError) {
+                toastElement.style.backgroundColor = '#e74c3c';
+            } else {
+                toastElement.style.backgroundColor = 'var(--bubble-primary)';
+            }
+            
+            // Устанавливаем сообщение
+            toastElement.textContent = message;
+            
+            // Показываем toast
+            setTimeout(() => {
+                toastElement.classList.add('show');
+            }, 10);
+            
+            // Скрываем toast через 3 секунды
+            setTimeout(() => {
+                toastElement.classList.remove('show');
+                
+                // Удаляем toast из DOM после завершения анимации
+                setTimeout(() => {
+                    if (toastElement.parentNode) {
+                        document.body.removeChild(toastElement);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Функция для получения CSRF токена из cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

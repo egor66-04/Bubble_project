@@ -1,0 +1,68 @@
+/* Стили для админки элементов */
+
+/* Стилизация заголовков */
+.module h2, .app-chemistry .app-list-label {
+    color: #4a6fa5 !important;
+    font-weight: 600 !important;
+}
+
+/* Стилизация карточек элементов */
+.change-list .field-element_image img {
+    transition: transform 0.3s ease;
+}
+
+.change-list .field-element_image img:hover {
+    transform: scale(1.15);
+}
+
+/* Состояние элементов */
+.field-state_display span {
+    font-size: 0.85em;
+    font-weight: 600;
+    display: inline-block;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Стилизация выбора категории */
+select[name*="category"] {
+    border-color: #4a6fa5 !important;
+}
+
+/* Стилизация полей */
+.app-chemistry input[type="text"],
+.app-chemistry input[type="number"],
+.app-chemistry select,
+.app-chemistry textarea {
+    border-radius: 5px !important;
+    border: 1px solid #ced4da !important;
+    padding: 8px 12px !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.app-chemistry input[type="text"]:focus,
+.app-chemistry input[type="number"]:focus,
+.app-chemistry select:focus,
+.app-chemistry textarea:focus {
+    border-color: #4a6fa5 !important;
+    box-shadow: 0 0 0 0.2rem rgba(74, 111, 165, 0.25) !important;
+}
+
+/* Стилизация кнопок */
+.app-chemistry .button {
+    border-radius: 5px !important;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 767px) {
+    .field-element_image, .field-state_display {
+        text-align: center;
+    }
+    
+    .app-chemistry .submit-row {
+        padding: 10px !important;
+    }
+    
+    .app-chemistry .submit-row input {
+        margin: 5px 0 !important;
+    }
+} 

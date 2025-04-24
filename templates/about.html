@@ -1,0 +1,58 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}О проекте Bubble - Интерактивная таблица Менделеева{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center my-5">
+        <div class="col-md-8">
+            <div class="bubble-card text-center">
+                <div class="logo-container mb-4">
+                    <!-- PNG логотип -->
+                    <img src="{% static 'images/bubble-logo.png' %}" alt="Bubble Logo" class="img-fluid" style="max-width: 150px;">
+                </div>
+                
+                <h1 class="bubble-section-title">{% trans "О проекте Bubble" %}</h1>
+                
+                <div class="about-content mt-4">
+                    <p class="lead">
+                        {% trans "Bubble — это интерактивная образовательная платформа, созданная с целью сделать изучение химии увлекательным и доступным для всех." %}
+                    </p>
+                    
+                    <p>
+                        {% trans "Наш проект предлагает яркую и интерактивную таблицу Менделеева, подробную информацию о химических элементах, визуализацию химических реакций и многое другое." %}
+                    </p>
+                    
+                    <p>
+                        {% trans "С Bubble вы можете:" %}
+                    </p>
+                    
+                    <ul class="text-start">
+                        <li>{% trans "Изучать элементы таблицы Менделеева в игровой форме" %}</li>
+                        <li>{% trans "Проводить виртуальные химические эксперименты" %}</li>
+                        <li>{% trans "Проходить тесты и викторины" %}</li>
+                        <li>{% trans "Зарабатывать очки опыта и получать достижения" %}</li>
+                        <li>{% trans "Слушать озвучку элементов и их описаний" %}</li>
+                    </ul>
+                    
+                    <p>
+                        {% trans "Наша миссия — показать, что химия может быть не только полезной, но и очень увлекательной наукой!" %}
+                    </p>
+                </div>
+                
+                <div class="contact-section mt-5">
+                    <h2>{% trans "Связаться с нами" %}</h2>
+                    <p class="mt-3">
+                        {% trans "Есть вопросы или предложения? Мы будем рады услышать ваше мнение!" %}
+                    </p>
+                    <a href="https://t.me/bubbleproekt" target="_blank" class="btn bubble-btn mt-2">
+                        <i class="fab fa-telegram me-2"></i> @bubbleproekt
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

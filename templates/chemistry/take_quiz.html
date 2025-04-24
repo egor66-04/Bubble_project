@@ -1,0 +1,289 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ quiz.title }} - {% trans "Прохождение" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="quiz-header text-center mb-4">
+                <h1 class="bubble-section-title">{{ quiz.title }}</h1>
+                <div class="quiz-difficulty">
+                    <span class="badge rounded-pill 
+                        {% if quiz.level <= 2 %}bg-success
+                        {% elif quiz.level <= 5 %}bg-warning
+                        {% else %}bg-danger{% endif %} mb-3">
+                        {% trans "Уровень" %} {{ quiz.level }}
+                    </span>
+                </div>
+                <div class="quiz-time" id="quiz-timer" data-time-limit="{{ quiz.time_limit }}">
+                    <i class="fas fa-clock me-1"></i> <span id="minutes">{{ quiz.time_limit }}</span>:<span id="seconds">00</span>
+                </div>
+            </div>
+            
+            <form method="post" id="quiz-form">
+                {% csrf_token %}
+                
+                <div class="bubble-card quiz-progress-card mb-4">
+                    <div class="bubble-card-body p-2">
+                        <div class="progress">
+                            <div class="progress-bar" id="quiz-progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="quiz-questions">
+                    {% for question in questions %}
+                    <div class="bubble-card question-card mb-4 {% if not forloop.first %}d-none{% endif %}" data-question-id="{{ question.id }}" data-question-index="{{ forloop.counter0 }}">
+                        <div class="bubble-card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h3 class="h5 mb-0">{% trans "Вопрос" %} {{ forloop.counter }}/{{ questions|length }}</h3>
+                                <div class="question-points">
+                                    <i class="fas fa-star me-1 text-warning"></i> {{ question.points }} {% trans "баллов" %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bubble-card-body">
+                            <div class="question-text mb-4">
+                                {{ question.question_text }}
+                            </div>
+                            
+                            {% if question.related_element %}
+                            <div class="related-element mb-4">
+                                <div class="related-element-card" style="background-color: {{ question.related_element.category.color }}">
+                                    <div class="related-element-symbol">{{ question.related_element.symbol }}</div>
+                                    <div class="related-element-number">{{ question.related_element.atomic_number }}</div>
+                                    <div class="related-element-name">{{ question.related_element.name }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="answer-options">
+                                {% for answer in question.answers.all %}
+                                <div class="form-check answer-option mb-3">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" id="answer_{{ answer.id }}" value="{{ answer.id }}">
+                                    <label class="form-check-label w-100" for="answer_{{ answer.id }}">
+                                        <div class="answer-card">
+                                            {{ answer.answer_text }}
+                                        </div>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="question-navigation mt-4 d-flex justify-content-between">
+                                {% if not forloop.first %}
+                                <button type="button" class="btn bubble-outline-btn prev-question" data-prev-question="{{ forloop.counter0|add:"-1" }}">
+                                    <i class="fas fa-arrow-left me-2"></i> {% trans "Предыдущий" %}
+                                </button>
+                                {% else %}
+                                <div></div> <!-- Пустой div для выравнивания -->
+                                {% endif %}
+                                
+                                {% if forloop.last %}
+                                <button type="button" class="btn bubble-btn finish-quiz">
+                                    <i class="fas fa-check-circle me-2"></i> {% trans "Завершить тест" %}
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn bubble-btn next-question" data-next-question="{{ forloop.counter0|add:"1" }}" disabled>
+                                    {% trans "Следующий" %} <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="bubble-card quiz-summary mb-4 d-none" id="quiz-summary">
+                    <div class="bubble-card-header">
+                        <h3 class="h5 mb-0">{% trans "Проверка перед отправкой" %}</h3>
+                    </div>
+                    <div class="bubble-card-body">
+                        <p>{% trans "Вы ответили на" %} <span id="answered-count">0</span> {% trans "из" %} {{ questions|length }} {% trans "вопросов." %}</p>
+                        
+                        <div class="question-status-list mb-4">
+                            {% for question in questions %}
+                            <div class="question-status" data-question-index="{{ forloop.counter0 }}">
+                                <span class="question-number">{{ forloop.counter }}</span>
+                                <span class="question-answered-status not-answered">
+                                    <i class="fas fa-times-circle"></i>
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="button" class="btn bubble-outline-btn me-2" id="back-to-quiz">
+                                <i class="fas fa-edit me-2"></i> {% trans "Вернуться к тесту" %}
+                            </button>
+                            <button type="submit" class="btn bubble-btn">
+                                <i class="fas fa-paper-plane me-2"></i> {% trans "Отправить ответы" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для предупреждения -->
+<div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="warningModalLabel">{% trans "Внимание" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>{% trans "Пожалуйста, выберите ответ перед тем, как продолжить." %}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn bubble-btn" data-bs-dismiss="modal">{% trans "Понятно" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-header {
+        margin-bottom: 30px;
+    }
+    
+    .quiz-time {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--bubble-primary);
+    }
+    
+    .question-card {
+        transition: all 0.3s ease;
+    }
+    
+    .question-points {
+        font-weight: 600;
+    }
+    
+    .question-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    
+    .answer-option label {
+        cursor: pointer;
+    }
+    
+    .answer-card {
+        padding: 15px;
+        border-radius: 10px;
+        background-color: #f8f9fa;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+    
+    .answer-option:hover .answer-card {
+        background-color: #e9ecef;
+    }
+    
+    .form-check-input:checked + label .answer-card {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-color: var(--bubble-primary);
+    }
+    
+    .related-element {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .related-element-card {
+        width: 100px;
+        height: 100px;
+        border-radius: 10px;
+        padding: 10px;
+        color: white;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .related-element-symbol {
+        font-size: 2.5rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+    
+    .related-element-number {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        font-size: 0.8rem;
+    }
+    
+    .related-element-name {
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    
+    .question-status-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .question-status {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        cursor: pointer;
+    }
+    
+    .question-number {
+        font-weight: bold;
+    }
+    
+    .question-answered-status {
+        position: absolute;
+        bottom: -5px;
+        right: -5px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+    
+    .not-answered {
+        background-color: #e74c3c;
+        color: white;
+    }
+    
+    .answered {
+        background-color: #2ecc71;
+        color: white;
+    }
+    
+    .quiz-timer-warning {
+        color: #e74c3c !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/take_quiz.js' %}"></script>
+{% endblock %} 

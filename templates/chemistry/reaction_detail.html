@@ -1,0 +1,138 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ reaction.name }} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h1 class="card-title mb-0">{{ reaction.name }}</h1>
+        </div>
+        <div class="card-body">
+            <div class="reaction-equation mb-4">
+                <h3>{% trans "Уравнение реакции" %}</h3>
+                <div class="reaction-display p-3 bg-light rounded text-center">
+                    {% for reactant in reaction.reactants.all %}
+                        {% if not forloop.first %} + {% endif %}
+                        <a href="{% url 'chemistry:element_detail' reactant.atomic_number %}" class="element-link">
+                            <span class="element-symbol">{{ reactant.symbol }}</span>
+                        </a>
+                    {% endfor %}
+                    <span class="reaction-arrow mx-3">→</span>
+                    {% for product in reaction.products.all %}
+                        {% if not forloop.first %} + {% endif %}
+                        <a href="{% url 'chemistry:element_detail' product.atomic_number %}" class="element-link">
+                            <span class="element-symbol">{{ product.symbol }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="reaction-details">
+                        <h3>{% trans "Детали реакции" %}</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>{% trans "Тип:" %}</strong> {{ reaction.reaction_type.name }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>{% trans "Энергия активации:" %}</strong> 
+                                {% if reaction.activation_energy %}
+                                    {{ reaction.activation_energy }} {% trans "кДж/моль" %}
+                                {% else %}
+                                    {% trans "Не указана" %}
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>{% trans "Экзо/Эндотермическая:" %}</strong> 
+                                {% if reaction.is_exothermic %}
+                                    <span class="badge bg-danger">{% trans "Экзотермическая" %}</span>
+                                {% else %}
+                                    <span class="badge bg-info">{% trans "Эндотермическая" %}</span>
+                                {% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>{% trans "Условия:" %}</strong> 
+                                {{ reaction.conditions|default:_("Стандартные условия") }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="reaction-balanced-status">
+                        <h3>{% trans "Баланс" %}</h3>
+                        {% if reaction.is_balanced %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                {% trans "Реакция сбалансирована" %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {% trans "Реакция не сбалансирована" %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if user.is_authenticated %}
+                    <div class="reaction-actions mt-4">
+                        <h3>{% trans "Действия" %}</h3>
+                        {% if reaction in user.favorite_reactions.all %}
+                        <a href="{% url 'accounts:remove_reaction_from_favorites' reaction.id %}" class="btn bubble-btn active w-100">
+                            <i class="fas fa-star me-1"></i> {% trans "В избранном" %}
+                        </a>
+                        {% else %}
+                        <a href="{% url 'accounts:add_reaction_to_favorites' reaction.id %}" class="btn bubble-btn-outline w-100">
+                            <i class="far fa-star me-1"></i> {% trans "Добавить в избранное" %}
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="reaction-description mb-4">
+                <h3>{% trans "Описание" %}</h3>
+                <p>{{ reaction.description|default:_("Описание отсутствует.") }}</p>
+            </div>
+
+            {% if reaction.applications %}
+            <div class="reaction-applications mb-4">
+                <h3>{% trans "Применение" %}</h3>
+                <p>{{ reaction.applications }}</p>
+            </div>
+            {% endif %}
+
+            {% if related_reactions %}
+            <div class="related-reactions">
+                <h3>{% trans "Похожие реакции" %}</h3>
+                <div class="list-group">
+                    {% for related in related_reactions %}
+                    <a href="{% url 'chemistry:reaction_detail' related.id %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ related.name }}</h5>
+                            <small>{{ related.reaction_type.name }}</small>
+                        </div>
+                        <p class="mb-1">
+                            {% for reactant in related.reactants.all %}
+                            {% if not forloop.first %} + {% endif %}
+                            <span class="element-symbol">{{ reactant.symbol }}</span>
+                            {% endfor %}
+                            <span class="reaction-arrow">→</span>
+                            {% for product in related.products.all %}
+                            {% if not forloop.first %} + {% endif %}
+                            <span class="element-symbol">{{ product.symbol }}</span>
+                            {% endfor %}
+                        </p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

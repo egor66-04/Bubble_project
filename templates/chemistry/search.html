@@ -1,0 +1,199 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Результаты поиска" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="bubble-card mb-4">
+                <div class="bubble-card-header">
+                    <h1 class="h3 mb-0">
+                        {% if query %}
+                            {% trans "Результаты поиска для: " %} <span class="text-primary">"{{ query }}"</span>
+                        {% else %}
+                            {% trans "Поиск по элементам" %}
+                        {% endif %}
+                    </h1>
+                </div>
+                <div class="bubble-card-body">
+                    <form class="mb-4" action="{% url 'chemistry:chemistry_search' %}" method="GET">
+                        <div class="input-group bubble-search-large">
+                            <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="{% trans 'Введите название элемента, символ или атомный номер...' %}">
+                            <button class="btn bubble-btn" type="submit">
+                                <i class="fas fa-search me-2"></i> {% trans "Искать" %}
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% if query %}
+                        {% if results %}
+                            <p class="mb-3">{% trans "Найдено элементов:" %} <span class="badge bg-primary">{{ results|length }}</span></p>
+                        {% else %}
+                            <div class="empty-search-result text-center py-5">
+                                <div class="empty-state-icon mb-3">
+                                    <i class="fas fa-search-minus"></i>
+                                </div>
+                                <h3>{% trans "Ничего не найдено" %}</h3>
+                                <p class="text-muted">{% trans "Попробуйте изменить поисковый запрос или сбросить фильтры." %}</p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="search-guide text-center py-4">
+                            <div class="search-guide-icon mb-3">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>{% trans "Что искать?" %}</h3>
+                            <p class="text-muted">{% trans "Вы можете искать по названию элемента (Кислород, Калий), символу (O, K) или атомному номеру (8, 19)." %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if results %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for element in results %}
+                        <div class="col">
+                            <div class="element-card-result">
+                                <div class="element-card-result-header" style="background-color: {{ element.category.color }}">
+                                    <div class="element-symbol">{{ element.symbol }}</div>
+                                    <div class="element-number">{{ element.atomic_number }}</div>
+                                </div>
+                                <div class="element-card-result-body">
+                                    <h3 class="element-name">{{ element.name }}</h3>
+                                    <div class="element-details">
+                                        <div class="element-detail-item">
+                                            <span class="element-detail-label">{% trans "Категория:" %}</span>
+                                            <span class="element-detail-value">{{ element.category.name }}</span>
+                                        </div>
+                                        <div class="element-detail-item">
+                                            <span class="element-detail-label">{% trans "Атомный вес:" %}</span>
+                                            <span class="element-detail-value">{{ element.atomic_weight }}</span>
+                                        </div>
+                                        <div class="element-detail-item">
+                                            <span class="element-detail-label">{% trans "Состояние:" %}</span>
+                                            <span class="element-detail-value">
+                                                {% if element.state == 'solid' %}
+                                                    <i class="fas fa-cube" title="{% trans 'Твёрдое' %}"></i> {% trans "Твёрдое" %}
+                                                {% elif element.state == 'liquid' %}
+                                                    <i class="fas fa-tint" title="{% trans 'Жидкое' %}"></i> {% trans "Жидкое" %}
+                                                {% elif element.state == 'gas' %}
+                                                    <i class="fas fa-wind" title="{% trans 'Газообразное' %}"></i> {% trans "Газообразное" %}
+                                                {% else %}
+                                                    <i class="fas fa-question" title="{% trans 'Неизвестно' %}"></i> {% trans "Неизвестно" %}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'chemistry:element_detail' element.atomic_number %}" class="btn bubble-btn w-100 mt-3">
+                                        <i class="fas fa-info-circle me-2"></i> {% trans "Подробнее" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bubble-search-large {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .bubble-search-large input {
+        border: none;
+        padding: 15px 20px;
+        font-size: 1.1rem;
+    }
+
+    .bubble-search-large button {
+        padding: 0 25px;
+    }
+    
+    .empty-state-icon, .search-guide-icon {
+        font-size: 3rem;
+        color: var(--bubble-secondary);
+        opacity: 0.6;
+    }
+    
+    .element-card-result {
+        background-color: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .element-card-result:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .element-card-result-header {
+        padding: 20px;
+        text-align: center;
+        position: relative;
+        color: white;
+    }
+    
+    .element-symbol {
+        font-size: 3rem;
+        font-weight: bold;
+        line-height: 1;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .element-number {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+    
+    .element-card-result-body {
+        padding: 20px;
+    }
+    
+    .element-name {
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+    }
+    
+    .element-details {
+        margin-bottom: 15px;
+    }
+    
+    .element-detail-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .element-detail-label {
+        color: #666;
+    }
+    
+    .element-detail-value {
+        font-weight: 500;
+    }
+</style>
+{% endblock %} 

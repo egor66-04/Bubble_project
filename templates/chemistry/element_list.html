@@ -1,0 +1,414 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Химические элементы" %} - Bubble{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="bubble-section-title text-center">{% trans "Химические элементы" %}</h1>
+            <p class="lead text-center">{% trans "Изучайте химические элементы и их свойства" %}</p>
+        </div>
+    </div>
+
+    <div class="bubble-card mb-4">
+        <div class="bubble-card-header">
+            <h2 class="h5 mb-0">{% trans "Фильтры" %}</h2>
+        </div>
+        <div class="bubble-card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="category" class="form-label">{% trans "Категория" %}</label>
+                    <select name="category" id="category" class="form-select bubble-select">
+                        <option value="">{% trans "Все категории" %}</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if current_category == category.id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="state" class="form-label">{% trans "Агрегатное состояние" %}</label>
+                    <select name="state" id="state" class="form-select bubble-select">
+                        <option value="">{% trans "Все состояния" %}</option>
+                        {% for state_value, state_name in states %}
+                            <option value="{{ state_value }}" {% if current_state == state_value %}selected{% endif %}>
+                                {{ state_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="q" class="form-label">{% trans "Поиск" %}</label>
+                    <input type="text" class="form-control bubble-input" id="q" name="q" 
+                        value="{{ current_query }}" placeholder="{% trans 'Имя или символ элемента' %}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn bubble-btn w-100">
+                        <i class="fas fa-search me-1"></i> {% trans "Найти" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        {% for element in elements %}
+        <div class="col">
+            <div class="element-card-result">
+                <div class="element-card-result-header" style="background-color: {{ element.category.color }}">
+                    <div class="element-symbol">{{ element.symbol }}</div>
+                    <div class="element-number">{{ element.atomic_number }}</div>
+                </div>
+                <div class="element-card-result-body">
+                    <h3 class="element-name">{{ element.name }}</h3>
+                    <div class="element-details">
+                        <div class="element-detail-item">
+                            <span class="element-detail-label">{% trans "Категория:" %}</span>
+                            <span class="element-detail-value">{{ element.category.name }}</span>
+                        </div>
+                        <div class="element-detail-item">
+                            <span class="element-detail-label">{% trans "Атомный вес:" %}</span>
+                            <span class="element-detail-value">{{ element.atomic_weight }}</span>
+                        </div>
+                        <div class="element-detail-item">
+                            <span class="element-detail-label">{% trans "Состояние:" %}</span>
+                            <span class="element-detail-value">
+                                {% if element.state == 'solid' %}
+                                    <i class="fas fa-cube" title="{% trans 'Твёрдое' %}"></i> {% trans "Твёрдое" %}
+                                {% elif element.state == 'liquid' %}
+                                    <i class="fas fa-tint" title="{% trans 'Жидкое' %}"></i> {% trans "Жидкое" %}
+                                {% elif element.state == 'gas' %}
+                                    <i class="fas fa-wind" title="{% trans 'Газообразное' %}"></i> {% trans "Газообразное" %}
+                                {% else %}
+                                    <i class="fas fa-question" title="{% trans 'Неизвестно' %}"></i> {% trans "Неизвестно" %}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="element-actions">
+                        <a href="{% url 'chemistry:element_detail' element.atomic_number %}" class="btn bubble-btn w-100 mb-2">
+                            <i class="fas fa-info-circle me-2"></i> {% trans "Подробнее" %}
+                        </a>
+                        
+                        {% if user.is_authenticated %}
+                        <button 
+                            class="btn bubble-outline-btn w-100 favorite-element-btn {% if element.id in favorite_element_ids %}favorited{% endif %}" 
+                            data-element-id="{{ element.id }}">
+                            {% if element.id in favorite_element_ids %}
+                            <i class="fas fa-heart me-2"></i> {% trans "В избранном" %}
+                            {% else %}
+                            <i class="far fa-heart me-2"></i> {% trans "В избранное" %}
+                            {% endif %}
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="empty-state text-center py-5">
+                <div class="empty-state-icon mb-3">
+                    <i class="fas fa-flask-empty"></i>
+                </div>
+                <h3>{% trans "Элементы не найдены" %}</h3>
+                <p class="text-muted">{% trans "Попробуйте изменить критерии поиска или сбросить фильтры." %}</p>
+                <a href="{% url 'chemistry:element_list' %}" class="btn bubble-btn mt-3">
+                    <i class="fas fa-sync me-2"></i> {% trans "Сбросить фильтры" %}
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav aria-label="{% trans 'Навигация по страницам' %}">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if current_query %}&q={{ current_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_state %}&state={{ current_state }}{% endif %}" aria-label="{% trans 'Первая' %}">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_query %}&q={{ current_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_state %}&state={{ current_state }}{% endif %}" aria-label="{% trans 'Предыдущая' %}">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if current_query %}&q={{ current_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_state %}&state={{ current_state }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_query %}&q={{ current_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_state %}&state={{ current_state }}{% endif %}" aria-label="{% trans 'Следующая' %}">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_query %}&q={{ current_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_state %}&state={{ current_state }}{% endif %}" aria-label="{% trans 'Последняя' %}">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <div class="bubble-card mt-4">
+        <div class="bubble-card-header">
+            <h2 class="h5 mb-0">{% trans "Интересные факты о химических элементах" %}</h2>
+        </div>
+        <div class="bubble-card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="h5">{% trans "Знаете ли вы, что..." %}</h3>
+                    <ul class="bubble-list">
+                        <li>{% trans "Кислород составляет около 21% земной атмосферы и необходим всем живым организмам." %}</li>
+                        <li>{% trans "Гелий — единственный элемент, который впервые обнаружили не на Земле, а на Солнце!" %}</li>
+                        <li>{% trans "В человеческом теле больше всего кислорода, углерода, водорода и азота." %}</li>
+                        <li>{% trans "Ртуть — единственный металл, который при комнатной температуре находится в жидком состоянии." %}</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h3 class="h5">{% trans "Как изучать элементы?" %}</h3>
+                    <p>{% trans "Для эффективного изучения химических элементов:" %}</p>
+                    <ol class="bubble-list">
+                        <li>{% trans "Исследуйте периодическую таблицу Менделеева" %}</li>
+                        <li>{% trans "Изучайте детальную информацию о каждом элементе" %}</li>
+                        <li>{% trans "Проходите тесты и викторины для закрепления знаний" %}</li>
+                        <li>{% trans "Добавляйте интересные элементы в избранное" %}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .element-card-result {
+        background-color: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .element-card-result:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .element-card-result-header {
+        padding: 20px;
+        text-align: center;
+        position: relative;
+        color: white;
+    }
+    
+    .element-symbol {
+        font-size: 3rem;
+        font-weight: bold;
+        line-height: 1;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .element-number {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+    
+    .element-card-result-body {
+        padding: 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .element-name {
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+    }
+    
+    .element-details {
+        margin-bottom: 15px;
+    }
+    
+    .element-detail-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .element-detail-label {
+        color: #666;
+    }
+    
+    .element-detail-value {
+        font-weight: 500;
+    }
+    
+    .element-actions {
+        margin-top: auto;
+    }
+    
+    .bubble-list {
+        padding-left: 20px;
+    }
+    
+    .bubble-list li {
+        margin-bottom: 10px;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        color: var(--bubble-secondary);
+        opacity: 0.5;
+    }
+    
+    .bubble-select, .bubble-input {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        padding: 8px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .bubble-select:focus, .bubble-input:focus {
+        border-color: var(--bubble-primary);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    
+    .favorited {
+        background-color: #e74c3c !important;
+        border-color: #e74c3c !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработка клика по кнопке "В избранное"
+        const favoriteButtons = document.querySelectorAll('.favorite-element-btn');
+        
+        favoriteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const elementId = this.dataset.elementId;
+                toggleFavoriteElement(elementId, this);
+            });
+        });
+        
+        // Функция добавления/удаления из избранного
+        function toggleFavoriteElement(elementId, button) {
+            // AJAX запрос к серверу
+            fetch(`/chemistry/api/elements/toggle-favorite/${elementId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (data.action === 'added') {
+                        button.innerHTML = '<i class="fas fa-heart me-2"></i> {% trans "В избранном" %}';
+                        button.classList.add('favorited');
+                        showToast('{% trans "Элемент добавлен в избранное!" %}');
+                    } else {
+                        button.innerHTML = '<i class="far fa-heart me-2"></i> {% trans "В избранное" %}';
+                        button.classList.remove('favorited');
+                        showToast('{% trans "Элемент удален из избранного" %}');
+                    }
+                } else {
+                    showToast('{% trans "Произошла ошибка. Попробуйте позже." %}');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('{% trans "Произошла ошибка. Попробуйте позже." %}');
+            });
+        }
+        
+        // Функция показа уведомления
+        function showToast(message) {
+            // Создаем toast-элемент, если его еще нет на странице
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastId = 'toast-' + Date.now();
+            const toastHTML = `
+                <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">Bubble</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            
+            // Автоматически удалим toast после закрытия
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                toastElement.remove();
+            });
+        }
+        
+        // Получение CSRF токена из cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %} 
