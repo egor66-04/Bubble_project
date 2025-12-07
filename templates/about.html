@@ -14,45 +14,221 @@
                     <img src="{% static 'images/bubble-logo.png' %}" alt="Bubble Logo" class="img-fluid" style="max-width: 150px;">
                 </div>
                 
-                <h1 class="bubble-section-title">{% trans "О проекте Bubble" %}</h1>
+                <h1 class="bubble-section-title mb-4">{% trans "О проекте Bubble" %}</h1>
                 
                 <div class="about-content mt-4">
-                    <p class="lead">
-                        {% trans "Bubble — это интерактивная образовательная платформа, созданная с целью сделать изучение химии увлекательным и доступным для всех." %}
+                    <p class="lead text-center mb-5">
+                        {% trans "Мы делаем изучение химии увлекательным, доступным и интерактивным для каждого" %}
                     </p>
                     
-                    <p>
-                        {% trans "Наш проект предлагает яркую и интерактивную таблицу Менделеева, подробную информацию о химических элементах, визуализацию химических реакций и многое другое." %}
-                    </p>
-                    
-                    <p>
-                        {% trans "С Bubble вы можете:" %}
-                    </p>
-                    
-                    <ul class="text-start">
-                        <li>{% trans "Изучать элементы таблицы Менделеева в игровой форме" %}</li>
-                        <li>{% trans "Проводить виртуальные химические эксперименты" %}</li>
-                        <li>{% trans "Проходить тесты и викторины" %}</li>
-                        <li>{% trans "Зарабатывать очки опыта и получать достижения" %}</li>
-                        <li>{% trans "Слушать озвучку элементов и их описаний" %}</li>
-                    </ul>
-                    
-                    <p>
-                        {% trans "Наша миссия — показать, что химия может быть не только полезной, но и очень увлекательной наукой!" %}
-                    </p>
+                    <!-- Наша миссия -->
+                    <div class="mission-section mb-5">
+                        <h2 class="text-primary mb-3">
+                            <i class="fas fa-bullseye me-2"></i>{% trans "Наша миссия" %}
+                        </h2>
+                        <p>
+                            {% trans "Bubble создан с целью превратить изучение химии из скучного заучивания формул в захватывающее путешествие по миру молекул и атомов. Мы верим, что каждый может полюбить химию, если подойти к ее изучению правильно." %}
+                        </p>
+                        <p>
+                            {% trans "Наша задача — показать, что химия окружает нас повсюду: от воды, которую мы пьем, до воздуха, которым дышим. Понимание химических процессов помогает лучше понять мир вокруг нас." %}
+                        </p>
+                    </div>
+
+                    <!-- Наши ценности -->
+                    <div class="values-section mb-5">
+                        <h2 class="text-primary mb-4">
+                            <i class="fas fa-heart me-2"></i>{% trans "Наши ценности" %}
+                        </h2>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="value-card p-4 h-100">
+                                    <h4><i class="fas fa-lightbulb text-warning me-2"></i>{% trans "Доступность" %}</h4>
+                                    <p>{% trans "Химия должна быть понятна каждому, независимо от возраста и уровня подготовки." %}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="value-card p-4 h-100">
+                                    <h4><i class="fas fa-gamepad text-success me-2"></i>{% trans "Интерактивность" %}</h4>
+                                    <p>{% trans "Лучший способ учиться — практиковаться. Мы создаем интерактивный опыт обучения." %}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="value-card p-4 h-100">
+                                    <h4><i class="fas fa-smile text-info me-2"></i>{% trans "Увлекательность" %}</h4>
+                                    <p>{% trans "Обучение должно приносить радость. Мы используем геймификацию для мотивации." %}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="value-card p-4 h-100">
+                                    <h4><i class="fas fa-check-circle text-primary me-2"></i>{% trans "Качество" %}</h4>
+                                    <p>{% trans "Вся информация проверена и соответствует научным стандартам." %}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Для кого мы -->
+                    <div class="audience-section mb-5">
+                        <h2 class="text-primary mb-4">
+                            <i class="fas fa-users me-2"></i>{% trans "Для кого Bubble?" %}
+                        </h2>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="audience-card text-center p-4">
+                                    <i class="fas fa-user-graduate fa-3x text-primary mb-3"></i>
+                                    <h5>{% trans "Школьники" %}</h5>
+                                    <p>{% trans "Помощь в изучении химии с 7 по 11 класс" %}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="audience-card text-center p-4">
+                                    <i class="fas fa-chalkboard-teacher fa-3x text-success mb-3"></i>
+                                    <h5>{% trans "Учителя" %}</h5>
+                                    <p>{% trans "Дополнительный материал для уроков" %}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="audience-card text-center p-4">
+                                    <i class="fas fa-child fa-3x text-warning mb-3"></i>
+                                    <h5>{% trans "Любознательные дети" %}</h5>
+                                    <p>{% trans "Первое знакомство с химией в игровой форме" %}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Наши достижения -->
+                    <div class="achievements-section mb-5">
+                        <h2 class="text-primary mb-4">
+                            <i class="fas fa-award me-2"></i>{% trans "Наши достижения" %}
+                        </h2>
+                        <div class="row g-4 text-center">
+                            <div class="col-md-3 col-6">
+                                <div class="stat-card p-4">
+                                    <h2 class="text-primary mb-2">1000+</h2>
+                                    <p class="text-muted">{% trans "Активных пользователей" %}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="stat-card p-4">
+                                    <h2 class="text-success mb-2">118</h2>
+                                    <p class="text-muted">{% trans "Химических элементов" %}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="stat-card p-4">
+                                    <h2 class="text-warning mb-2">50+</h2>
+                                    <p class="text-muted">{% trans "Химических реакций" %}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="stat-card p-4">
+                                    <h2 class="text-info mb-2">100+</h2>
+                                    <p class="text-muted">{% trans "Тестовых вопросов" %}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- История проекта -->
+                    <div class="history-section mb-5">
+                        <h2 class="text-primary mb-3">
+                            <i class="fas fa-history me-2"></i>{% trans "Наша история" %}
+                        </h2>
+                        <p>
+                            {% trans "Проект Bubble был создан командой энтузиастов, которые увлечены химией и образованием. Мы заметили, что многим детям сложно понять химию из-за абстрактности предмета и недостатка интерактивных инструментов для обучения." %}
+                        </p>
+                        <p>
+                            {% trans "Так родилась идея создать платформу, где можно было бы визуально исследовать элементы, наблюдать за реакциями и учиться в игровой форме. С момента запуска мы постоянно совершенствуем платформу, добавляя новые функции и улучшая пользовательский опыт." %}
+                        </p>
+                    </div>
+
+                    <!-- Технологии -->
+                    <div class="tech-section mb-5">
+                        <h2 class="text-primary mb-3">
+                            <i class="fas fa-code me-2"></i>{% trans "Технологии" %}
+                        </h2>
+                        <p>{% trans "Bubble построен с использованием современных веб-технологий:" %}</p>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <ul>
+                                    <li>Python & Django — мощный бэкенд</li>
+                                    <li>Bootstrap 5 — адаптивный дизайн</li>
+                                    <li>JavaScript — интерактивность</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul>
+                                    <li>Web Speech API — озвучка</li>
+                                    <li>PostgreSQL — надежное хранение данных</li>
+                                    <li>Responsive Design — работа на всех устройствах</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="contact-section mt-5">
-                    <h2>{% trans "Связаться с нами" %}</h2>
-                    <p class="mt-3">
-                        {% trans "Есть вопросы или предложения? Мы будем рады услышать ваше мнение!" %}
+                <div class="contact-section mt-5 pt-4 border-top">
+                    <h2 class="text-center mb-3">
+                        <i class="fas fa-envelope me-2"></i>{% trans "Связаться с нами" %}
+                    </h2>
+                    <p class="text-center text-muted mb-4">
+                        {% trans "Есть вопросы, предложения или просто хотите поделиться своим мнением? Мы всегда рады обратной связи!" %}
                     </p>
-                    <a href="https://t.me/bubbleproekt" target="_blank" class="btn bubble-btn mt-2">
-                        <i class="fab fa-telegram me-2"></i> @bubbleproekt
-                    </a>
+                    <div class="text-center">
+                        <a href="https://t.me/bubbleproekt" target="_blank" class="btn bubble-btn btn-lg">
+                            <i class="fab fa-telegram me-2"></i>{% trans "Написать в Telegram" %}
+                        </a>
+                    </div>
+                    <p class="text-center text-muted mt-4 small">
+                        {% trans "Обычно мы отвечаем в течение 24 часов" %}
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.value-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.value-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.audience-card {
+    background: white;
+    border-radius: 15px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.audience-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+}
+
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: scale(1.05);
+}
+
+.stat-card h2 {
+    font-weight: bold;
+    font-size: 2.5rem;
+}
+</style>
 {% endblock %} 

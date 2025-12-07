@@ -216,7 +216,7 @@ class QuizAdmin(admin.ModelAdmin):
 class QuizAnswerInline(admin.TabularInline):
     model = QuizAnswer
     extra = 2
-    fields = ('text', 'is_correct')
+    fields = ('answer_text', 'is_correct')
 
 @admin.register(QuizQuestion)
 class QuizQuestionAdmin(admin.ModelAdmin):

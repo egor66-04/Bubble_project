@@ -1,6 +1,45 @@
 /**
  * Bubble - Основной JavaScript файл
  */
+
+// Утилиты
+const Utils = {
+    /**
+     * Debounce функция для оптимизации частых вызовов
+     * @param {Function} func - Функция для вызова
+     * @param {number} wait - Время ожидания в мс
+     * @returns {Function}
+     */
+    debounce(func, wait = 300) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+
+    /**
+     * Throttle функция для ограничения частоты вызовов
+     * @param {Function} func - Функция для вызова
+     * @param {number} limit - Минимальный интервал между вызовами в мс
+     * @returns {Function}
+     */
+    throttle(func, limit = 100) {
+        let inThrottle;
+        return function(...args) {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // Инициализация всплывающих подсказок Bootstrap
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -13,6 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
     popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
+    
+    // Инициализация поиска с debounce
+    setupSearchWithDebounce();
     
     // Обработка добавления в избранное через AJAX
     setupFavorites();
@@ -32,8 +74,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Проверяем новые достижения сразу при загрузке страницы
         checkNewAchievements();
         
-        // И периодически проверяем каждые 30 секунд
-        setInterval(checkNewAchievements, 30000);
+        // И периодически проверяем каждые 60 секунд (оптимизация)
+        setInterval(checkNewAchievements, 60000);
     }
 });
 
@@ -354,6 +396,25 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+/**
+ * Настройка поиска с debounce для оптимизации
+ */
+function setupSearchWithDebounce() {
+    const searchInputs = document.querySelectorAll('input[type="search"]');
+    
+    searchInputs.forEach(input => {
+        // Добавляем debounce для живого поиска
+        const debouncedSearch = Utils.debounce((value) => {
+            // Здесь можно добавить живой поиск через AJAX
+            console.log('Searching for:', value);
+        }, 500);
+        
+        input.addEventListener('input', (e) => {
+            debouncedSearch(e.target.value);
+        });
+    });
 }
 
 // Функция для добавления и скрытия уведомления о достижении

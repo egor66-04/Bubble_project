@@ -1,9 +1,41 @@
+# Django Framework
 Django==5.1.6
-Pillow==10.2.0
+
+# Обработка изображений
+Pillow==11.0.0
+
+# Формы Bootstrap
 crispy-bootstrap5==2024.10
-django-crispy-forms>=2.3
-gunicorn==21.2.0
-whitenoise==6.6.0
-python-dotenv==1.0.1 
-jazzmin==2.6.0
-djangorestframework
+django-crispy-forms==2.3
+
+# Web Server для production
+gunicorn==23.0.0
+
+# Статические файлы для production
+whitenoise==6.8.2
+
+# Переменные окружения
+python-dotenv==1.0.1
+
+# Улучшенная админка
+django-jazzmin==3.0.0
+
+# REST API
+djangorestframework==3.15.2
+
+# Безопасность и производительность
+django-ratelimit==4.1.0
+django-cors-headers==4.6.0
+
+# Мониторинг (опционально)
+# sentry-sdk==2.18.0
+
+# Redis кеширование (опционально)
+# django-redis==5.4.0
+# redis==5.2.0
+
+# Асинхронные задачи (опционально)
+# celery==5.4.0
+
+# Debug toolbar для разработки
+# django-debug-toolbar==4.4.6

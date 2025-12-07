@@ -1,0 +1,269 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Часто задаваемые вопросы - Bubble{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="bubble-section-title text-center mb-5">
+                <i class="fas fa-question-circle me-3"></i>
+                {% trans "Часто задаваемые вопросы" %}
+            </h1>
+
+            <div class="accordion" id="faqAccordion">
+                <!-- Блок 1: Общие вопросы -->
+                <div class="mb-4">
+                    <h3 class="text-primary mb-3">{% trans "Общие вопросы" %}</h3>
+                    
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading1">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                {% trans "Что такое Bubble?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Bubble — это интерактивная образовательная платформа для изучения химии. Мы предлагаем красочную таблицу Менделеева, подробную информацию о каждом химическом элементе, визуализацию химических реакций и увлекательные тесты. Наша цель — сделать химию доступной и интересной для детей и подростков." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading2">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                {% trans "Для кого предназначена платформа?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Bubble создан для школьников, студентов и всех, кто интересуется химией. Наша платформа особенно полезна для учеников 7-11 классов, но подойдет и для тех, кто только начинает знакомство с этой увлекательной наукой." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading3">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                {% trans "Нужно ли платить за использование платформы?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Базовая версия Bubble полностью бесплатна и включает доступ к таблице Менделеева, информации об элементах и базовым викторинам. Для доступа к расширенному функционалу, включая все реакции, продвинутые тесты и персонализированные рекомендации, доступна Premium-подписка." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Блок 2: Функционал -->
+                <div class="mb-4">
+                    <h3 class="text-primary mb-3">{% trans "Возможности платформы" %}</h3>
+                    
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading4">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                                {% trans "Что такое интерактивная таблица Менделеева?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Наша интерактивная таблица позволяет изучать каждый элемент в деталях. Клик по любому элементу открывает карточку с подробной информацией: атомная масса, электронная конфигурация, интересные факты, применение в жизни. Элементы окрашены по категориям для лучшего понимания их свойств." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading5">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse5">
+                                {% trans "Как работает визуализация химических реакций?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "В разделе реакций вы можете выбрать элементы и посмотреть, как они взаимодействуют друг с другом. Каждая реакция сопровождается формулой, подробным описанием процесса и объяснением результата. Это помогает лучше понять химические превращения." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading6">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse6">
+                                {% trans "Что такое система достижений?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Мы используем игровые механики, чтобы сделать обучение увлекательнее! Изучая элементы, проходя тесты и исследуя реакции, вы зарабатываете очки опыта (XP) и получаете достижения. Это мотивирует продолжать обучение и отслеживать свой прогресс." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading7">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse7">
+                                {% trans "Как работает функция озвучивания?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "На странице каждого элемента есть кнопка озвучивания. Нажав на нее, вы услышите название элемента и его описание. Это особенно полезно для аудиального восприятия информации и правильного произношения химических терминов." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Блок 3: Аккаунт и подписка -->
+                <div class="mb-4">
+                    <h3 class="text-primary mb-3">{% trans "Аккаунт и подписка" %}</h3>
+                    
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading8">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse8">
+                                {% trans "Нужно ли регистрироваться?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Базовые функции доступны без регистрации, но мы рекомендуем создать аккаунт. Это позволит отслеживать прогресс обучения, сохранять избранные элементы, получать достижения и участвовать в рейтинге пользователей." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading9">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse9">
+                                {% trans "Что дает Premium-подписка?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse9" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <p>{% trans "Premium-подписка открывает дополнительные возможности:" %}</p>
+                                <ul>
+                                    <li>{% trans "Доступ ко всем химическим реакциям и экспериментам" %}</li>
+                                    <li>{% trans "Расширенная библиотека викторин и тестов" %}</li>
+                                    <li>{% trans "Персональные рекомендации по обучению" %}</li>
+                                    <li>{% trans "Режим без рекламы" %}</li>
+                                    <li>{% trans "Эксклюзивные достижения и награды" %}</li>
+                                    <li>{% trans "Приоритетная поддержка" %}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading10">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse10">
+                                {% trans "Как отменить подписку?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse10" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Вы можете отменить подписку в любой момент в настройках профиля. После отмены подписка останется активной до конца оплаченного периода, после чего автоматически прекратится. Ваши данные и прогресс сохранятся." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Блок 4: Технические вопросы -->
+                <div class="mb-4">
+                    <h3 class="text-primary mb-3">{% trans "Технические вопросы" %}</h3>
+                    
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading11">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse11">
+                                {% trans "На каких устройствах работает Bubble?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse11" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Bubble — это веб-платформа, которая работает на всех современных устройствах: компьютерах, планшетах и смартфонах. Сайт полностью адаптирован для мобильных устройств, так что вы можете учиться где угодно." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading12">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse12">
+                                {% trans "Какие браузеры поддерживаются?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse12" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Bubble работает во всех современных браузерах: Google Chrome, Mozilla Firefox, Safari, Microsoft Edge и Opera. Для лучшего опыта рекомендуем использовать последние версии браузеров." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading13">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse13">
+                                {% trans "Что делать, если возникла проблема?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse13" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Если у вас возникли технические проблемы или вопросы, свяжитесь с нами через Telegram @bubbleproekt. Мы постараемся помочь в кратчайшие сроки!" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Блок 5: Обучение -->
+                <div class="mb-4">
+                    <h3 class="text-primary mb-3">{% trans "Обучение" %}</h3>
+                    
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading14">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse14">
+                                {% trans "Как начать изучение химии на Bubble?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse14" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Рекомендуем начать с изучения таблицы Менделеева — это основа химии. Затем переходите к изучению отдельных элементов, особенно тех, которые встречаются в повседневной жизни (водород, кислород, углерод). После этого можно приступать к викторинам и изучению химических реакций." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading15">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse15">
+                                {% trans "Можно ли использовать Bubble для подготовки к экзаменам?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse15" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "Да! Bubble — отличный инструмент для подготовки к школьным контрольным, ОГЭ и ЕГЭ по химии. Наши викторины помогут закрепить знания, а интерактивный формат сделает подготовку менее утомительной и более эффективной." %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bubble-card mb-2">
+                        <h2 class="accordion-header" id="heading16">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse16">
+                                {% trans "Есть ли у вас мобильное приложение?" %}
+                            </button>
+                        </h2>
+                        <div id="collapse16" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {% trans "В данный момент мобильного приложения нет, но наш сайт полностью адаптирован для мобильных устройств. Вы можете добавить Bubble на главный экран вашего смартфона для быстрого доступа, и это будет работать почти как приложение!" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5 pt-4 border-top">
+                <h4 class="mb-3">{% trans "Не нашли ответ на свой вопрос?" %}</h4>
+                <p class="text-muted mb-4">{% trans "Свяжитесь с нами, и мы с радостью поможем!" %}</p>
+                <a href="https://t.me/bubbleproekt" target="_blank" class="btn bubble-btn">
+                    <i class="fab fa-telegram me-2"></i>{% trans "Написать в Telegram" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -33,6 +33,9 @@ urlpatterns += i18n_patterns(
     path('chemistry/', include('chemistry.urls')),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
     path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
+    path('features/', TemplateView.as_view(template_name='features.html'), name='features'),
+    path('faq/', TemplateView.as_view(template_name='faq.html'), name='faq'),
+    path('cartoons/', TemplateView.as_view(template_name='cartoons.html'), name='cartoons'),
     prefix_default_language=False,  # Не добавлять префикс для языка по умолчанию
 )
 

@@ -1,0 +1,140 @@
+{% extends 'base/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Мультфильмы - Bubble{% endblock %}
+
+{% block description %}Смотри образовательные мультфильмы о химии и науке на Bubble{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Заголовок секции -->
+    <section class="bubble-hero text-center mb-5">
+        <h1 class="bubble-hero-title">
+            <i class="fas fa-film me-3"></i>{% trans "Образовательные мультфильмы" %}
+        </h1>
+        <p class="bubble-hero-subtitle">{% trans "Изучай химию через увлекательные мультики!" %}</p>
+    </section>
+
+    <!-- Плейлист YouTube -->
+    <section class="cartoons-section">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="bubble-card p-4">
+                    <h2 class="text-center mb-4">
+                        <i class="fab fa-youtube text-danger me-2"></i>
+                        {% trans "Плейлист научных мультфильмов" %}
+                    </h2>
+                    
+                    <!-- YouTube плеер с плейлистом -->
+                    <div class="ratio ratio-16x9 mb-4">
+                        <iframe
+                            src="https://www.youtube.com/embed/videoseries?list=PLO7FUJHSsKrB8OLlWMinmDm9F2jCE58Mg&enablejsapi=1"
+                            title="YouTube video player"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                            referrerpolicy="no-referrer-when-downgrade"
+                            loading="lazy">
+                        </iframe>
+                    </div>
+
+                    <!-- Информация о плейлисте -->
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="fas fa-info-circle me-3 fs-4"></i>
+                        <div>
+                            <strong>{% trans "Как пользоваться:" %}</strong><br>
+                            {% trans "Нажми на значок списка в правом верхнем углу видео, чтобы увидеть все мультфильмы в плейлисте." %}
+                        </div>
+                    </div>
+
+                    <!-- Дополнительная информация -->
+                    <div class="text-center mt-4">
+                        <a href="https://www.youtube.com/playlist?list=PLO7FUJHSsKrB8OLlWMinmDm9F2jCE58Mg" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="btn bubble-btn">
+                            <i class="fab fa-youtube me-2"></i>
+                            {% trans "Открыть плейлист на YouTube" %}
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Дополнительные возможности -->
+                <div class="row g-4 mt-4">
+                    <div class="col-md-4">
+                        <div class="bubble-feature-card text-center">
+                            <div class="bubble-feature-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h3>{% trans "Обучение" %}</h3>
+                            <p>{% trans "Узнавай новые факты о науке и химии в интересной форме" %}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bubble-feature-card text-center">
+                            <div class="bubble-feature-icon">
+                                <i class="fas fa-play-circle"></i>
+                            </div>
+                            <h3>{% trans "Развлечение" %}</h3>
+                            <p>{% trans "Смотри мультфильмы в любое время и с любого устройства" %}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bubble-feature-card text-center">
+                            <div class="bubble-feature-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3>{% trans "Новый контент" %}</h3>
+                            <p>{% trans "Регулярные обновления плейлиста с новыми мультфильмами" %}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Призыв к действию -->
+                <div class="bubble-cta-card mt-5">
+                    <h2 class="text-center">{% trans "Понравились мультфильмы?" %}</h2>
+                    <p class="text-center">{% trans "Продолжи изучение химии с нашей интерактивной таблицей Менделеева!" %}</p>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'chemistry:periodic_table' %}" class="btn bubble-btn-lg">
+                            <i class="fas fa-table me-2"></i>
+                            {% trans "Перейти к таблице Менделеева" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .cartoons-section {
+        margin-top: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .bubble-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        color: white;
+    }
+    
+    .bubble-card h2 {
+        color: white;
+        font-weight: 700;
+    }
+    
+    .bubble-card .alert-info {
+        background-color: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 15px;
+    }
+    
+    .ratio iframe {
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}

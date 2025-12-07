@@ -69,14 +69,20 @@ class ChemicalReaction(models.Model):
 
 class ElementDetail(models.Model):
     """Дополнительные детали о химическом элементе"""
-    element = models.OneToOneField(Element, on_delete=models.CASCADE, 
+    element = models.OneToOneField(Element, on_delete=models.CASCADE,
                                   related_name='details', verbose_name=_('Элемент'))
     melting_point = models.FloatField(_('Температура плавления (°C)'), null=True, blank=True)
     boiling_point = models.FloatField(_('Температура кипения (°C)'), null=True, blank=True)
+    density = models.FloatField(_('Плотность (г/см³)'), null=True, blank=True)
+    thermal_conductivity = models.FloatField(_('Теплопроводность (Вт/(м·К))'), null=True, blank=True)
     electron_configuration = models.CharField(_('Электронная конфигурация'), max_length=100, blank=True)
+    electron_shell_image = models.ImageField(_('Изображение электронных оболочек'), upload_to='electron_shells/', blank=True, null=True)
     electronegativity = models.FloatField(_('Электроотрицательность'), null=True, blank=True)
     discovery_year = models.PositiveSmallIntegerField(_('Год открытия'), null=True, blank=True)
     discovered_by = models.CharField(_('Кем открыт'), max_length=255, blank=True)
+    discovery_info = models.TextField(_('История открытия'), blank=True)
+    applications = models.TextField(_('Применение'), blank=True)
+    fun_facts = models.TextField(_('Интересные факты'), blank=True)
     
     class Meta:
         verbose_name = _('Детали элемента')

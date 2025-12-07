@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import Element, ElementCategory, ChemicalReaction, ElementDetail
-from accounts.models import LearningProgress, UserQuizResult, Quiz, QuizQuestion, QuizAnswer, UserFavoriteElement
+from accounts.models import LearningProgress, UserQuizResult, Quiz, QuizQuestion, QuizAnswer, UserFavoriteElement, User
 from django.views.generic import ListView, DetailView
 from django.views.decorators.http import require_POST
 import json
@@ -13,18 +13,19 @@ from accounts.views import check_and_award_achievement
 
 def element_list(request):
     """Список всех химических элементов"""
-    elements = Element.objects.filter(is_active=True)
+    # Оптимизация: используем select_related для избежания N+1 запросов
+    elements = Element.objects.filter(is_active=True).select_related('category')
     
     # Поиск и фильтрация
     search_query = request.GET.get('search', '')
     category_id = request.GET.get('category', '')
     
     if search_query:
-        elements = elements.filter(
-            Q(name__icontains=search_query) |
-            Q(symbol__icontains=search_query) |
-            Q(atomic_number__icontains=search_query)
-        )
+        # Исправление безопасности: правильная обработка поиска по числовому полю
+        filters = Q(name__icontains=search_query) | Q(symbol__icontains=search_query)
+        if search_query.isdigit():
+            filters |= Q(atomic_number=int(search_query))
+        elements = elements.filter(filters)
     
     if category_id:
         elements = elements.filter(category_id=category_id)
@@ -47,7 +48,8 @@ def element_list(request):
 
 def periodic_table(request):
     """Представление периодической таблицы"""
-    elements = Element.objects.all()
+    # Оптимизация: используем select_related для избежания N+1 запросов
+    elements = Element.objects.select_related('category').all()
     categories = ElementCategory.objects.all()
     
     # Добавляем информацию для расположения элементов в таблице
@@ -95,10 +97,10 @@ def element_detail(request, atomic_number):
     if request.user.is_authenticated:
         is_favorite = request.user.favorite_elements.filter(id=element.id).exists()
         
-    # Получение связанных реакций
+    # Получение связанных реакций с оптимизацией
     reactions = ChemicalReaction.objects.filter(
         Q(reactants=element) | Q(products=element)
-    ).distinct()
+    ).prefetch_related('reactants', 'products').distinct()
     
     # Получение связанных элементов (элементы из той же категории, но не более 5)
     related_elements = Element.objects.filter(
@@ -109,12 +111,11 @@ def element_detail(request, atomic_number):
     if request.user.is_authenticated:
         learning_progress, created = LearningProgress.objects.get_or_create(
             user=request.user,
-            element=element,
-            defaults={'views_count': 1}
+            element=element
         )
         
+        # Просто обновляем last_interaction (auto_now=True сделает это автоматически)
         if not created:
-            learning_progress.views_count += 1
             learning_progress.save()
         
         # Проверяем и выдаем достижение "Первый элемент"
@@ -148,8 +149,15 @@ def state_detail(request, pk):
 
 def reaction_list(request):
     """Список химических реакций"""
-    reactions = ChemicalReaction.objects.all()
-    elements = Element.objects.all()[:10]  # Ограничиваем для демонстрации
+    # Оптимизация: prefetch_related для M2M полей и пагинация
+    reactions = ChemicalReaction.objects.filter(is_active=True).prefetch_related('reactants', 'products')
+    
+    # Добавляем пагинацию
+    paginator = Paginator(reactions, 20)
+    page = request.GET.get('page')
+    reactions = paginator.get_page(page)
+    
+    elements = Element.objects.filter(is_active=True).select_related('category')[:10]
     
     return render(request, 'chemistry/reaction_list.html', {
         'reactions': reactions,
@@ -183,12 +191,16 @@ def search(request):
     
     results = []
     if query:
+        # Исправление безопасности: правильная обработка поиска по числовому полю
+        filters = Q(name__icontains=query) | Q(symbol__icontains=query)
+        if query.isdigit():
+            filters |= Q(atomic_number=int(query))
+        
+        # Оптимизация: select_related для категории
         results = Element.objects.filter(
-            Q(name__icontains=query) |
-            Q(symbol__icontains=query) |
-            Q(atomic_number__icontains=query),
+            filters,
             is_active=True
-        ).order_by('atomic_number')
+        ).select_related('category').order_by('atomic_number')
         
         # Проверяем и выдаем достижение "Первый поиск"
         if request.user.is_authenticated:
@@ -248,59 +260,76 @@ def take_quiz(request, pk):
     
     # Проверяем, может ли пользователь проходить этот тест (по уровню)
     if request.user.level < quiz.level:
+        messages.error(request, f'Требуется {quiz.level} уровень для прохождения этого теста')
         return redirect('chemistry:quiz_list')
     
-    # Получаем все вопросы для теста
-    questions = QuizQuestion.objects.filter(quiz=quiz)
+    # Получаем все вопросы для теста с оптимизацией
+    questions = QuizQuestion.objects.filter(quiz=quiz).prefetch_related('answers').select_related('related_element')
     
     if request.method == 'POST':
         score = 0
         max_score = 0
-        correct_answers_count = 0
+        correct_answers_streak = 0
+        max_streak = 0
         
         # Обрабатываем ответы пользователя
         for question in questions:
             answer_id = request.POST.get(f'question_{question.id}')
+            max_score += question.points
+            
             if answer_id:
-                selected_answer = get_object_or_404(QuizAnswer, id=answer_id)
-                max_score += question.points
-                
-                if selected_answer.is_correct:
-                    score += question.points
-                    correct_answers_count += 1
-                else:
-                    correct_answers_count = 0  # Сбрасываем счетчик правильных ответов при ошибке
+                try:
+                    selected_answer = QuizAnswer.objects.get(id=answer_id, question=question)
+                    
+                    if selected_answer.is_correct:
+                        score += question.points
+                        correct_answers_streak += 1
+                        max_streak = max(max_streak, correct_answers_streak)
+                    else:
+                        correct_answers_streak = 0
+                except QuizAnswer.DoesNotExist:
+                    correct_answers_streak = 0
             else:
-                max_score += question.points
+                correct_answers_streak = 0
         
-        # Сохраняем результат
-        UserQuizResult.objects.create(
-            user=request.user,
-            quiz=quiz,
-            score=score,
-            max_score=max_score
-        )
+        # Используем транзакцию для атомарности операций
+        from django.db import transaction
         
-        # Начисляем опыт пользователю
-        xp_earned = int(score / max_score * 10)  # Предполагаем, что max_xp = 10 
-        request.user.xp_points += xp_earned
-        
-        # Проверяем повышение уровня
-        new_level = request.user.level
-        while request.user.xp_points >= new_level * 100:
-            new_level += 1
-        
-        # Если уровень изменился, обновляем его
-        if new_level > request.user.level:
-            request.user.level = new_level
-        
-        request.user.save()
+        with transaction.atomic():
+            # Сохраняем результат
+            UserQuizResult.objects.create(
+                user=request.user,
+                quiz=quiz,
+                score=score,
+                max_score=max_score
+            )
+            
+            # Начисляем опыт пользователю
+            xp_earned = int(score / max_score * 10) if max_score > 0 else 0
+            
+            # Блокируем пользователя для обновления
+            user = User.objects.select_for_update().get(pk=request.user.pk)
+            user.xp_points += xp_earned
+            
+            # Проверяем повышение уровня
+            new_level = user.level
+            while user.xp_points >= new_level * 100:
+                new_level += 1
+            
+            # Если уровень изменился, обновляем его
+            if new_level > user.level:
+                user.level = new_level
+            
+            user.save()
+            
+            # Обновляем данные в сессии
+            request.user.refresh_from_db()
         
         # Проверяем достижения
         check_and_award_achievement(request.user, 'first_quiz')
         
         # Проверяем достижение "Три правильных ответа подряд"
-        if correct_answers_count >= 3:
+        if max_streak >= 3:
             check_and_award_achievement(request.user, 'three_correct_answers')
         
         # Редирект на страницу результатов
@@ -316,25 +345,33 @@ def take_quiz(request, pk):
 # API для получения данных о химических элементах
 def api_element_list(request):
     """API для получения списка всех элементов"""
-    elements = Element.objects.filter(is_active=True)
-    
-    data = [{
-        'id': element.id,
-        'name': element.name,
-        'symbol': element.symbol,
-        'atomic_number': element.atomic_number,
-        'category': element.category.name,
-        'category_color': element.category.color,
-        'period': element.period,
-        'group': element.group,
-    } for element in elements]
-    
-    return JsonResponse({'elements': data})
+    try:
+        # Оптимизация: select_related для категории
+        elements = Element.objects.filter(is_active=True).select_related('category')
+        
+        data = [{
+            'id': element.id,
+            'name': element.name,
+            'symbol': element.symbol,
+            'atomic_number': element.atomic_number,
+            'category': element.category.name,
+            'category_color': element.category.color,
+            'period': element.period,
+            'group': element.group,
+        } for element in elements]
+        
+        return JsonResponse({'elements': data})
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"API error in element_list: {str(e)}")
+        return JsonResponse({'error': 'Внутренняя ошибка сервера'}, status=500)
 
 def api_element_detail(request, atomic_number):
     """API для получения детальной информации об элементе"""
     try:
-        element = Element.objects.get(atomic_number=atomic_number, is_active=True)
+        # Оптимизация: select_related для категории
+        element = Element.objects.select_related('category').get(atomic_number=atomic_number, is_active=True)
         
         # Базовая информация об элементе
         data = {
@@ -367,6 +404,11 @@ def api_element_detail(request, atomic_number):
         return JsonResponse(data)
     except Element.DoesNotExist:
         return JsonResponse({'error': 'Элемент не найден'}, status=404)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"API error in element_detail: {str(e)}")
+        return JsonResponse({'error': 'Внутренняя ошибка сервера'}, status=500)
 
 def api_check_reaction(request, element1_id, element2_id):
     """API для проверки реакций между элементами"""
@@ -390,7 +432,8 @@ class ElementListView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = Element.objects.filter(is_active=True)
+        # Оптимизация: select_related для категории
+        queryset = Element.objects.filter(is_active=True).select_related('category')
         
         # Фильтр по категории
         category_id = self.request.GET.get('category')
@@ -402,14 +445,13 @@ class ElementListView(ListView):
         if state:
             queryset = queryset.filter(state=state)
         
-        # Поиск
+        # Поиск с правильной обработкой числового поля
         query = self.request.GET.get('q')
         if query:
-            queryset = queryset.filter(
-                Q(name__icontains=query) |
-                Q(symbol__icontains=query) |
-                Q(atomic_number__icontains=query)
-            )
+            filters = Q(name__icontains=query) | Q(symbol__icontains=query)
+            if query.isdigit():
+                filters |= Q(atomic_number=int(query))
+            queryset = queryset.filter(filters)
         
         return queryset.order_by('atomic_number')
     

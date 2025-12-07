@@ -56,6 +56,13 @@
     
     <div class="row justify-content-center">
         <div class="col-xl-11">
+            <!-- Подсказка о прокрутке для мобильных -->
+            <div class="mobile-scroll-hint d-md-none mb-2 text-center">
+                <small class="text-muted">
+                    <i class="fas fa-hand-pointer"></i> {% trans "Пролистывайте таблицу влево и вправо" %}
+                </small>
+            </div>
+            
             <div class="periodic-table-container">
                 <div class="periodic-table-grid">
                     {% for element in elements %}
@@ -168,97 +175,188 @@
 
 {% block extra_css %}
 <style>
+    /* Контейнер таблицы с фоном */
     .periodic-table-container {
         max-width: 100%;
         margin: 0 auto;
         overflow-x: auto;
-        padding: 15px;
+        padding: 30px 15px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     }
     
+    /* Сетка таблицы */
     .periodic-table-grid {
         display: grid;
         grid-template-columns: repeat(18, 1fr);
-        grid-gap: 10px;
+        grid-gap: 8px;
         padding: 20px;
         max-width: 100%;
         margin: 0 auto;
-        overflow-x: auto;
+        min-height: 600px;
     }
     
+    /* Карточка элемента с 3D эффектом */
     .element-card {
         position: relative;
         width: 100%;
+        min-height: 90px;
         cursor: pointer;
-        transition: all 0.3s ease;
-        border-radius: 8px;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-radius: 12px;
+        overflow: visible;
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+        animation: elementAppear 0.6s ease forwards;
+    }
+    
+    @keyframes elementAppear {
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
     }
     
     .element-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        z-index: 2;
+        transform: translateY(-10px) scale(1.08);
+        z-index: 100;
+        filter: brightness(1.1);
     }
     
+    /* Внутренняя часть элемента с градиентом и блеском */
     .element-inner {
-        padding: 8px;
+        position: relative;
+        padding: 12px 8px;
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        border-radius: 8px;
+        border-radius: 12px;
+        background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255,255,255,0.3);
+        box-shadow:
+            0 8px 32px rgba(0,0,0,0.1),
+            inset 0 1px 0 rgba(255,255,255,0.9),
+            inset 0 -1px 0 rgba(0,0,0,0.1);
+        overflow: hidden;
     }
     
+    /* Блестящий эффект поверх элемента */
+    .element-inner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+            transparent,
+            rgba(255,255,255,0.4),
+            transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .element-card:hover .element-inner::before {
+        left: 100%;
+    }
+    
+    /* Цветная подложка по категориям */
+    .element-inner::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: currentColor;
+        opacity: 0.8;
+        box-shadow: 0 0 10px currentColor;
+    }
+    
+    /* Номер элемента */
     .element-number {
         position: absolute;
-        top: 6px;
-        left: 6px;
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.7);
+        top: 8px;
+        left: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.6);
+        background: rgba(255,255,255,0.7);
+        padding: 2px 6px;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
+    /* Символ элемента */
     .element-symbol {
-        font-size: 2rem;
-        font-weight: bold;
+        font-size: 2.2rem;
+        font-weight: 900;
         line-height: 1;
-        margin-bottom: 8px;
+        margin: 8px 0;
+        text-align: center;
+        color: #2c3e50;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-family: 'Baloo 2', 'Nunito', sans-serif;
     }
     
+    /* Название элемента */
     .element-name {
-        font-size: 13px;
-        margin-bottom: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 4px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        color: #34495e;
+        letter-spacing: 0.3px;
     }
     
+    /* Атомная масса */
     .element-weight {
-        font-size: 12px;
-        color: rgba(0, 0, 0, 0.7);
+        font-size: 10px;
+        text-align: center;
+        color: rgba(0, 0, 0, 0.6);
+        font-weight: 500;
     }
     
+    /* Индикатор состояния */
     .element-state-indicator {
         position: absolute;
-        bottom: 6px;
-        right: 6px;
-        font-size: 12px;
+        bottom: 8px;
+        right: 8px;
+        font-size: 14px;
         color: rgba(0, 0, 0, 0.7);
+        background: rgba(255,255,255,0.9);
+        padding: 3px 5px;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease;
     }
     
+    .element-card:hover .element-state-indicator {
+        transform: scale(1.2) rotate(360deg);
+    }
+    
+    /* Адаптивность для планшетов */
     @media (max-width: 992px) {
-        .periodic-table-grid {
-            grid-template-columns: repeat(9, 1fr);
-            grid-gap: 8px;
-            padding: 10px;
+        .periodic-table-container {
+            padding: 20px 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
-    }
-    
-    @media (max-width: 768px) {
-        .periodic-table {
-            grid-template-columns: repeat(18, minmax(60px, 1fr));
-            grid-template-rows: repeat(10, minmax(60px, auto));
-            gap: 6px;
+        
+        .periodic-table-grid {
+            grid-template-columns: repeat(18, minmax(50px, 1fr));
+            grid-gap: 5px;
+            padding: 15px;
+            min-width: 900px;
+        }
+        
+        .element-card {
+            min-height: 75px;
         }
         
         .element-symbol {
@@ -266,160 +364,612 @@
         }
         
         .element-name {
-            font-size: 11px;
+            font-size: 10px;
+        }
+        
+        .periodic-controls {
+            padding: 15px;
         }
     }
     
-    @media (max-width: 576px) {
-        .periodic-table {
-            grid-template-columns: repeat(18, minmax(50px, 1fr));
-            grid-template-rows: repeat(10, minmax(50px, auto));
-            gap: 4px;
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+        .periodic-table-container {
+            padding: 15px 5px;
+            border-radius: 15px;
+        }
+        
+        .periodic-table-grid {
+            grid-template-columns: repeat(18, 48px);
+            gap: 3px;
+            padding: 10px;
+            min-width: 850px;
+        }
+        
+        .element-card {
+            min-height: 65px;
         }
         
         .element-inner {
-            padding: 8px;
+            padding: 8px 4px;
         }
         
         .element-symbol {
-            font-size: 1.4rem;
-            margin-bottom: 4px;
+            font-size: 1.3rem;
         }
         
         .element-name {
-            font-size: 10px;
+            font-size: 8px;
+            margin-bottom: 2px;
+        }
+        
+        .element-weight {
+            font-size: 7px;
+        }
+        
+        .element-number {
+            font-size: 8px;
+            top: 4px;
+            left: 4px;
+            padding: 1px 3px;
+        }
+        
+        .element-state-indicator {
+            font-size: 11px;
+            bottom: 4px;
+            right: 4px;
         }
     }
     
+    /* Для очень маленьких экранов */
+    @media (max-width: 576px) {
+        .periodic-table-container {
+            padding: 10px 5px;
+        }
+        
+        .periodic-table-grid {
+            grid-template-columns: repeat(18, 42px);
+            gap: 2px;
+            padding: 8px;
+            min-width: 760px;
+        }
+        
+        .element-card {
+            min-height: 58px;
+        }
+        
+        .element-inner {
+            padding: 6px 3px;
+        }
+        
+        .element-symbol {
+            font-size: 1.1rem;
+            margin: 3px 0;
+        }
+        
+        .element-name {
+            font-size: 7px;
+            margin-bottom: 1px;
+        }
+        
+        .element-weight {
+            font-size: 6px;
+        }
+        
+        .element-number {
+            font-size: 7px;
+            top: 3px;
+            left: 3px;
+            padding: 1px 2px;
+        }
+        
+        .element-state-indicator {
+            font-size: 10px;
+            bottom: 3px;
+            right: 3px;
+            padding: 2px 3px;
+        }
+        
+        /* Упрощаем контролы для малых экранов */
+        .periodic-controls .row {
+            gap: 10px;
+        }
+        
+        .category-legend-item {
+            font-size: 11px;
+            padding: 6px 10px;
+        }
+    }
+    
+    /* Для экстра-маленьких экранов */
+    @media (max-width: 400px) {
+        .periodic-table-grid {
+            grid-template-columns: repeat(18, 38px);
+            gap: 2px;
+            min-width: 690px;
+        }
+        
+        .element-card {
+            min-height: 52px;
+        }
+        
+        .element-symbol {
+            font-size: 1rem;
+        }
+        
+        .element-name {
+            font-size: 6px;
+        }
+        
+        .element-weight,
+        .element-number {
+            font-size: 6px;
+        }
+    }
+    
+    /* Легенда категорий с градиентом */
     .periodic-table-legend {
-        background-color: white;
-        border-radius: 10px;
-        padding: 15px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    .category-legend-item {
-        padding: 5px 10px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
         border-radius: 15px;
-        font-size: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 2px solid transparent;
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255,255,255,0.5);
     }
     
-    .category-legend-item:hover, .category-legend-item.active {
+    .periodic-table-legend h5 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    /* Элементы легенды */
+    .category-legend-item {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 2px solid transparent;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .category-legend-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .category-legend-item:hover::before {
+        left: 100%;
+    }
+    
+    .category-legend-item:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .category-legend-item.active {
+        border-color: #667eea;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        border-color: #3498db;
     }
     
     .all-categories {
-        background-color: #f8f9fa;
-        color: #333;
-    }
-    
-    .element-modal-header {
-        background-color: var(--bubble-primary);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
     
+    /* Модальное окно */
+    .element-modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 20px;
+    }
+    
+    .element-modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+    
+    /* Большая карточка элемента в модалке */
     .element-card-large {
         position: relative;
-        border-radius: 15px;
-        padding: 20px;
-        height: 200px;
+        border-radius: 20px;
+        padding: 30px;
+        height: 220px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         text-align: center;
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        box-shadow:
+            0 15px 35px rgba(0, 0, 0, 0.15),
+            inset 0 -3px 0 rgba(0,0,0,0.1);
+        background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+        border: 2px solid rgba(255,255,255,0.5);
+        overflow: hidden;
+    }
+    
+    .element-card-large::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg,
+            transparent 30%,
+            rgba(255,255,255,0.3) 50%,
+            transparent 70%);
+        animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
     }
     
     .element-symbol-large {
-        font-size: 4rem;
-        font-weight: bold;
+        font-size: 5rem;
+        font-weight: 900;
         line-height: 1;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        color: #2c3e50;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        font-family: 'Baloo 2', sans-serif;
+        position: relative;
+        z-index: 1;
     }
     
     .element-number-large {
         position: absolute;
-        top: 10px;
-        left: 10px;
-        font-size: 16px;
+        top: 15px;
+        left: 15px;
+        font-size: 18px;
+        font-weight: 700;
+        background: rgba(255,255,255,0.9);
+        padding: 5px 10px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        z-index: 1;
     }
     
     .element-name-large {
-        font-size: 1.2rem;
-        margin-bottom: 5px;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #34495e;
+        position: relative;
+        z-index: 1;
     }
     
     .element-weight-large {
-        font-size: 1rem;
-    }
-    
-    .property-item {
-        margin-bottom: 15px;
-    }
-    
-    .property-label {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 3px;
-    }
-    
-    .property-value {
-        font-size: 16px;
+        font-size: 1.1rem;
+        color: rgba(0,0,0,0.7);
         font-weight: 500;
+        position: relative;
+        z-index: 1;
     }
     
-    .element-facts {
-        background-color: #f8f9fa;
+    /* Свойства элемента */
+    .property-item {
+        margin-bottom: 18px;
+        padding: 12px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-radius: 10px;
-        padding: 15px;
-        max-height: 200px;
-        overflow-y: auto;
-    }
-    
-    .element-facts p {
-        margin-bottom: 10px;
-    }
-    
-    .bubble-input, .bubble-select {
-        border-radius: 10px;
-        border: 2px solid #e0e0e0;
-        padding: 8px 15px;
+        border-left: 4px solid #667eea;
         transition: all 0.3s ease;
     }
     
-    .bubble-input:focus, .bubble-select:focus {
-        border-color: var(--bubble-primary);
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    .property-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     
-    .hidden-element {
-        opacity: 0.3;
-        transform: scale(0.95);
+    .property-label {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
-    .periodic-controls {
-        background-color: white;
+    .property-value {
+        font-size: 17px;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+    
+    /* Интересные факты */
+    .element-facts {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-radius: 15px;
         padding: 20px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        max-height: 220px;
+        overflow-y: auto;
+        border: 2px solid rgba(102, 126, 234, 0.2);
     }
     
+    .element-facts::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .element-facts::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .element-facts::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+    }
+    
+    .element-facts p {
+        margin-bottom: 12px;
+        line-height: 1.6;
+        color: #34495e;
+    }
+    
+    /* Поля ввода и селекты */
+    .bubble-input, .bubble-select {
+        border-radius: 12px;
+        border: 2px solid #e0e0e0;
+        padding: 10px 16px;
+        transition: all 0.3s ease;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .bubble-input:focus, .bubble-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+        outline: none;
+        transform: translateY(-1px);
+    }
+    
+    /* Скрытый элемент при фильтрации */
+    .hidden-element {
+        opacity: 0.2;
+        transform: scale(0.9);
+        pointer-events: none;
+    }
+    
+    /* Панель управления */
+    .periodic-controls {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255,255,255,0.8);
+    }
+    
+    /* Анимация подсветки при поиске */
     @keyframes highlight-pulse {
-        0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); }
-        70% { box-shadow: 0 0 0 15px rgba(52, 152, 219, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+        0% {
+            box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.9);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 0 15px rgba(102, 126, 234, 0);
+            transform: scale(1.1);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            transform: scale(1);
+        }
+    }
+    
+    .highlight-element {
+        animation: highlight-pulse 1.5s infinite;
+        z-index: 50;
     }
     
     .highlight-element .element-inner {
-        animation: highlight-pulse 2s infinite;
-        transform: scale(1.05);
-        z-index: 10;
+        border-color: #667eea;
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+    }
+    
+    /* Дополнительные эффекты для кнопок */
+    .element-actions .btn {
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .element-actions .btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .element-actions .btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+    
+    /* Подсказка о прокрутке для мобильных */
+    .mobile-scroll-hint {
+        padding: 8px 15px;
+        background: linear-gradient(135deg, #fff3cd 0%, #fff9e6 100%);
+        border-radius: 10px;
+        border: 1px solid #ffc107;
+        animation: pulse-hint 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-hint {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    .mobile-scroll-hint i {
+        color: #856404;
+        margin-right: 5px;
+    }
+    
+    /* Мобильная адаптация контролов */
+    @media (max-width: 768px) {
+        .periodic-controls .col-md-5,
+        .periodic-controls .col-md-3,
+        .periodic-controls .col-md-4 {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .periodic-controls .row {
+            row-gap: 0;
+        }
+        
+        .periodic-table-legend {
+            padding: 15px;
+        }
+        
+        .periodic-table-legend h5 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .category-legend-item {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+        
+        .bubble-input, .bubble-select {
+            font-size: 14px;
+        }
+    }
+    
+    /* Мобильная адаптация модального окна */
+    @media (max-width: 576px) {
+        .modal-dialog {
+            margin: 10px;
+        }
+        
+        .element-card-large {
+            height: 180px;
+            padding: 20px;
+        }
+        
+        .element-symbol-large {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .element-name-large {
+            font-size: 1.1rem;
+        }
+        
+        .element-weight-large {
+            font-size: 0.95rem;
+        }
+        
+        .element-number-large {
+            font-size: 14px;
+            padding: 4px 8px;
+            top: 10px;
+            left: 10px;
+        }
+        
+        .property-item {
+            margin-bottom: 12px;
+            padding: 10px;
+        }
+        
+        .property-label {
+            font-size: 11px;
+        }
+        
+        .property-value {
+            font-size: 14px;
+        }
+        
+        .element-facts {
+            max-height: 180px;
+            padding: 15px;
+        }
+        
+        .element-actions .btn {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        
+        .modal-body h4 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+    }
+    
+    /* Улучшение тач-взаимодействия */
+    @media (hover: none) and (pointer: coarse) {
+        .element-card {
+            transition: transform 0.2s ease;
+        }
+        
+        .element-card:active {
+            transform: scale(0.95);
+        }
+        
+        .element-card:hover {
+            transform: none;
+            filter: none;
+        }
+        
+        /* Увеличиваем области касания для удобства */
+        .category-legend-item,
+        .element-actions .btn {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Отключаем эффекты наведения на сенсорных экранах */
+        .element-inner::before {
+            display: none;
+        }
+        
+        .category-legend-item::before {
+            display: none;
+        }
+    }
+    
+    /* Дополнительная оптимизация для горизонтальной прокрутки */
+    @media (max-width: 768px) {
+        .periodic-table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .periodic-table-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        .periodic-table-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        
+        .periodic-table-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f8a 100%);
+        }
     }
 </style>
 {% endblock %}
@@ -696,7 +1246,38 @@
     });
 </script>
 
+<script src="{% static 'js/periodic_table.js' %}"></script>
+
 <style>
+    /* Частицы при клике */
+    .element-particle {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: radial-gradient(circle, rgba(102, 126, 234, 1) 0%, rgba(102, 126, 234, 0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: particle-burst 1s ease-out forwards;
+        z-index: 9999;
+    }
+    
+    @keyframes particle-burst {
+        0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(var(--tx), var(--ty)) scale(0);
+            opacity: 0;
+        }
+    }
+    
+    /* Класс для загруженных элементов */
+    .element-card.loaded {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    
     /* Стиль для toast-уведомлений */
     .bubble-toast {
         position: fixed;

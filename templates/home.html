@@ -2,38 +2,33 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}Bubble - Интерактивная таблица Менделеева{% endblock %}
+{% block title %}Bubble - Интерактивная таблица Менделеева для детей | Изучай химию играя{% endblock %}
+
+{% block description %}Bubble - лучшая образовательная платформа для изучения химии детьми. Интерактивная таблица Менделеева, химические реакции, викторины, достижения и геймификация. Делаем химию увлекательной!{% endblock %}
+
+{% block keywords %}таблица Менделеева онлайн, химия для детей, химические элементы, изучение химии, химические реакции, викторины по химии, образовательная платформа, геймификация обучения{% endblock %}
+
+{% block og_title %}Bubble - Изучай химию в игровой форме!{% endblock %}
+{% block og_description %}Интерактивная таблица Менделеева, химические реакции и увлекательные викторины. Зарабатывай достижения и изучай химию с удовольствием!{% endblock %}
 
 {% block content %}
 <div class="container">
-    <!-- Герой секция с анимированными пузырьками -->
+    <!-- Герой секция -->
     <section class="bubble-hero">
-        <div class="bubble-animation">
-            <!-- Анимированные пузырьки будут добавлены через CSS -->
-            <div class="bubble bubble-1"></div>
-            <div class="bubble bubble-2"></div>
-            <div class="bubble bubble-3"></div>
-            <div class="bubble bubble-4"></div>
-            <div class="bubble bubble-5"></div>
-        </div>
-        
         <div class="row align-items-center">
-            <div class="col-lg-6">
+            <div class="col-lg-8 mx-auto text-center">
                 <h1 class="bubble-hero-title">{% trans "Исследуй мир химии вместе с Bubble!" %}</h1>
                 <p class="bubble-hero-subtitle">{% trans "Интерактивная таблица Менделеева, реакции, тесты и многое другое" %}</p>
-                <div class="d-flex gap-3 mt-4">
-                    <a href="{% url 'chemistry:periodic_table' %}" class="btn bubble-btn-lg">
-                        <i class="fas fa-table me-2"></i> {% trans "Открыть таблицу" %}
+                <div class="d-flex gap-3 mt-4 flex-wrap justify-content-center">
+                    <a href="{% url 'chemistry:periodic_table' %}" class="btn bubble-btn-lg" aria-label="Открыть интерактивную таблицу Менделеева">
+                        <i class="fas fa-table me-2" aria-hidden="true"></i> {% trans "Открыть таблицу" %}
                     </a>
                     {% if not user.is_authenticated %}
-                    <a href="{% url 'accounts:register' %}" class="btn bubble-btn-secondary-lg">
-                        <i class="fas fa-user-plus me-2"></i> {% trans "Регистрация" %}
+                    <a href="{% url 'accounts:register' %}" class="btn bubble-btn-secondary-lg" aria-label="Зарегистрироваться бесплатно">
+                        <i class="fas fa-user-plus me-2" aria-hidden="true"></i> {% trans "Регистрация" %}
                     </a>
                     {% endif %}
                 </div>
-            </div>
-            <div class="col-lg-6 d-none d-lg-block">
-                <img src="{% static 'images/hero-image.png' %}" alt="" class="img-fluid bubble-hero-image">
             </div>
         </div>
     </section>
@@ -139,8 +134,8 @@
             </div>
         </div>
         <div class="text-center mt-4">
-            <a href="{% url 'chemistry:element_list' %}" class="btn bubble-btn">
-                <i class="fas fa-flask me-2"></i> {% trans "Смотреть все элементы" %}
+            <a href="{% url 'chemistry:element_list' %}" class="btn bubble-btn" aria-label="Перейти к полному списку химических элементов">
+                <i class="fas fa-flask me-2" aria-hidden="true"></i> {% trans "Смотреть все элементы" %}
             </a>
         </div>
     </section>
@@ -153,23 +148,23 @@
             <div class="mt-4">
                 {% if user.is_authenticated %}
                     {% if user.is_subscribed %}
-                    <a href="{% url 'chemistry:periodic_table' %}" class="btn bubble-btn-lg">
-                        <i class="fas fa-rocket me-2"></i> {% trans "Перейти к таблице Менделеева" %}
+                    <a href="{% url 'chemistry:periodic_table' %}" class="btn bubble-btn-lg" aria-label="Начать изучение таблицы Менделеева">
+                        <i class="fas fa-rocket me-2" aria-hidden="true"></i> {% trans "Перейти к таблице Менделеева" %}
                     </a>
                     {% else %}
-                    <a href="{% url 'accounts:subscription' %}" class="btn bubble-btn-lg">
-                        <i class="fas fa-crown me-2"></i> {% trans "Купить подписку Pro" %}
+                    <a href="{% url 'accounts:subscription' %}" class="btn bubble-btn-lg" aria-label="Оформить Premium подписку">
+                        <i class="fas fa-crown me-2" aria-hidden="true"></i> {% trans "Купить подписку Pro" %}
                     </a>
-                    <a href="{% url 'chemistry:periodic_table' %}" class="btn bubble-btn-outline ms-3">
-                        <i class="fas fa-table me-2"></i> {% trans "Перейти к таблице" %}
+                    <a href="{% url 'chemistry:periodic_table' %}" class="btn bubble-btn-outline ms-3" aria-label="Перейти к таблице Менделеева">
+                        <i class="fas fa-table me-2" aria-hidden="true"></i> {% trans "Перейти к таблице" %}
                     </a>
                     {% endif %}
                 {% else %}
-                <a href="{% url 'accounts:register' %}" class="btn bubble-btn-lg">
-                    <i class="fas fa-user-plus me-2"></i> {% trans "Зарегистрироваться бесплатно" %}
+                <a href="{% url 'accounts:register' %}" class="btn bubble-btn-lg" aria-label="Создать бесплатный аккаунт">
+                    <i class="fas fa-user-plus me-2" aria-hidden="true"></i> {% trans "Зарегистрироваться бесплатно" %}
                 </a>
-                <a href="{% url 'accounts:login' %}" class="btn bubble-btn-outline ms-3">
-                    {% trans "У меня уже есть аккаунт" %}
+                <a href="{% url 'accounts:login' %}" class="btn bubble-btn-outline ms-3" aria-label="Войти в существующий аккаунт">
+                    <i class="fas fa-sign-in-alt me-2" aria-hidden="true"></i> {% trans "У меня уже есть аккаунт" %}
                 </a>
                 {% endif %}
             </div>
@@ -177,25 +172,3 @@
     </section>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-    // Функция для анимации пузырьков
-    document.addEventListener('DOMContentLoaded', function() {
-        const bubbles = document.querySelectorAll('.bubble');
-        bubbles.forEach(bubble => {
-            // Случайная начальная позиция
-            const startPos = Math.random() * 100;
-            bubble.style.left = `${startPos}%`;
-            
-            // Случайная задержка
-            const delay = Math.random() * 5;
-            bubble.style.animationDelay = `${delay}s`;
-            
-            // Случайная продолжительность
-            const duration = 5 + Math.random() * 10;
-            bubble.style.animationDuration = `${duration}s`;
-        });
-    });
-</script>
-{% endblock %} 

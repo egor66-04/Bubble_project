@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, logout as auth_logout
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.utils import timezone
@@ -11,11 +11,17 @@ from django.utils.translation import gettext as _
 from django.core.cache import cache
 
 from .models import (
-    User, UserFavoriteElement, UserAchievement, LearningProgress, 
+    User, UserFavoriteElement, UserAchievement, LearningProgress,
     UserQuizResult, Quiz, QuizQuestion, QuizAnswer, Achievement
 )
 from chemistry.models import Element, ChemicalReaction
 from .forms import UserRegisterForm, UserUpdateForm, UserProfileForm
+
+def logout_view(request):
+    """Выход из системы"""
+    auth_logout(request)
+    messages.info(request, 'Вы успешно вышли из системы.')
+    return redirect('home')
 
 def register(request):
     """Регистрация нового пользователя"""
@@ -33,11 +39,15 @@ def register(request):
 @login_required
 def profile(request):
     """Профиль пользователя"""
-    # Количество изученных элементов
-    learned_elements_count = LearningProgress.objects.filter(
-        user=request.user, 
-        is_learned=True
-    ).count()
+    from django.db.models import Count, Q
+    
+    # Оптимизация: один запрос вместо нескольких
+    progress_stats = LearningProgress.objects.filter(user=request.user).aggregate(
+        learned=Count('id', filter=Q(is_learned=True)),
+        total=Count('id')
+    )
+    
+    learned_elements_count = progress_stats['learned']
     
     # Общее количество элементов в системе
     total_elements_count = Element.objects.filter(is_active=True).count()
@@ -48,28 +58,27 @@ def profile(request):
     else:
         learning_progress_percent = 0
     
-    # Последние 5 изученных элементов
+    # Последние 5 изученных элементов с оптимизацией
     recent_elements = LearningProgress.objects.filter(
         user=request.user
-    ).order_by('-last_interaction')[:5]
+    ).select_related('element').order_by('-last_interaction')[:5]
     
-    # Последние достижения
+    # Последние достижения с оптимизацией
     recent_achievements = UserAchievement.objects.filter(
         user=request.user
-    ).order_by('-achieved_at')[:5]
+    ).select_related('achievement').order_by('-achieved_at')[:5]
     
-    # Количество пройденных тестов
-    quiz_completed_count = UserQuizResult.objects.filter(user=request.user).count()
+    # Статистика по тестам одним запросом
+    quiz_stats = UserQuizResult.objects.filter(user=request.user).aggregate(
+        count=Count('id'),
+        total_score=Sum('score'),
+        total_max=Sum('max_score')
+    )
     
-    # Средний результат по тестам (в процентах)
-    quiz_results = UserQuizResult.objects.filter(user=request.user)
-    if quiz_results.exists():
-        total_score = quiz_results.aggregate(Sum('score'))['score__sum']
-        total_max_score = quiz_results.aggregate(Sum('max_score'))['max_score__sum']
-        if total_max_score > 0:
-            avg_quiz_score_percent = int((total_score / total_max_score) * 100)
-        else:
-            avg_quiz_score_percent = 0
+    quiz_completed_count = quiz_stats['count'] or 0
+    
+    if quiz_stats['total_max'] and quiz_stats['total_max'] > 0:
+        avg_quiz_score_percent = int((quiz_stats['total_score'] / quiz_stats['total_max']) * 100)
     else:
         avg_quiz_score_percent = 0
     
@@ -153,6 +162,8 @@ def check_and_award_achievement(user, achievement_type):
     Returns:
         UserAchievement или None: Возвращает объект достижения, если оно было выдано, или None
     """
+    from django.db import transaction
+    
     # Если пользователь не аутентифицирован, не выдаем достижение
     if not user.is_authenticated:
         return None
@@ -173,26 +184,33 @@ def check_and_award_achievement(user, achievement_type):
     if user.level < achievement.required_level:
         return None
     
-    # Выдаем достижение
-    user_achievement = UserAchievement.objects.create(
-        user=user,
-        achievement=achievement
-    )
-    
-    # Начисляем опыт пользователю
-    if achievement.xp_reward > 0:
-        user.xp_points += achievement.xp_reward
+    # Используем транзакцию для атомарности
+    with transaction.atomic():
+        # Выдаем достижение
+        user_achievement = UserAchievement.objects.create(
+            user=user,
+            achievement=achievement
+        )
         
-        # Проверяем повышение уровня
-        new_level = user.level
-        while user.xp_points >= new_level * 100:
-            new_level += 1
-        
-        # Если уровень изменился, обновляем его
-        if new_level > user.level:
-            user.level = new_level
-        
-        user.save()
+        # Начисляем опыт пользователю
+        if achievement.xp_reward > 0:
+            # Блокируем пользователя для обновления
+            locked_user = User.objects.select_for_update().get(pk=user.pk)
+            locked_user.xp_points += achievement.xp_reward
+            
+            # Проверяем повышение уровня
+            new_level = locked_user.level
+            while locked_user.xp_points >= new_level * 100:
+                new_level += 1
+            
+            # Если уровень изменился, обновляем его
+            if new_level > locked_user.level:
+                locked_user.level = new_level
+            
+            locked_user.save()
+            
+            # Обновляем данные в памяти
+            user.refresh_from_db()
     
     return user_achievement
 
@@ -231,10 +249,10 @@ def achievements(request):
 @login_required
 def learning_progress(request):
     """Страница прогресса обучения пользователя"""
-    # Прогресс изучения элементов
+    # Прогресс изучения элементов с оптимизацией
     element_progress = LearningProgress.objects.filter(
         user=request.user
-    ).order_by('-progress_percent')
+    ).select_related('element', 'element__category').order_by('-progress_percent')
     
     # Статистика по прогрессу
     total_elements = Element.objects.filter(is_active=True).count()
@@ -262,7 +280,8 @@ def learning_progress(request):
 @login_required
 def favorite_elements(request):
     """Показать избранные элементы пользователя"""
-    favorite_elements = request.user.favorite_elements.all()
+    # Оптимизация: select_related для категории
+    favorite_elements = request.user.favorite_elements.select_related('category').all()
     return render(request, 'accounts/favorite_elements.html', {
         'favorite_elements': favorite_elements
     })
@@ -271,7 +290,8 @@ def favorite_elements(request):
 def favorite_reactions(request):
     """Отображает список избранных реакций пользователя."""
     user = request.user
-    favorite_reactions = user.favorite_reactions.all().order_by('-id')
+    # Оптимизация: prefetch_related для M2M полей
+    favorite_reactions = user.favorite_reactions.prefetch_related('reactants', 'products').all().order_by('-id')
     
     return render(request, 'accounts/favorite_reactions.html', {
         'favorite_reactions': favorite_reactions,
@@ -347,7 +367,10 @@ def remove_from_favorites(request, element_id):
 @login_required
 def quiz_history(request):
     """История пройденных тестов пользователя"""
-    quiz_results = UserQuizResult.objects.filter(user=request.user).order_by('-completed_at')
+    # Оптимизация: select_related для викторины
+    quiz_results = UserQuizResult.objects.filter(
+        user=request.user
+    ).select_related('quiz').order_by('-completed_at')
     
     context = {
         'quiz_results': quiz_results,
@@ -430,8 +453,10 @@ def subscription_success(request):
 @login_required
 def check_new_achievements_api(request):
     """API для проверки новых достижений пользователя"""
-    # Получаем все достижения пользователя
-    user_achievements = UserAchievement.objects.filter(user=request.user).order_by('-achieved_at')
+    # Получаем все достижения пользователя с оптимизацией
+    user_achievements = UserAchievement.objects.filter(
+        user=request.user
+    ).select_related('achievement').order_by('-achieved_at')
     
     # Создаем ключ для кэша
     cache_key = f"user_{request.user.id}_shown_achievements"
