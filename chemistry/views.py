@@ -150,7 +150,7 @@ def state_detail(request, pk):
 def reaction_list(request):
     """Список химических реакций"""
     # Оптимизация: prefetch_related для M2M полей и пагинация
-    reactions = ChemicalReaction.objects.filter(is_active=True).prefetch_related('reactants', 'products')
+    reactions = ChemicalReaction.objects.filter(is_active=True).prefetch_related('reactants', 'products').order_by('id')
     
     # Добавляем пагинацию
     paginator = Paginator(reactions, 20)
