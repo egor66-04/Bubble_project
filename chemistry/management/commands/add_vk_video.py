@@ -6,13 +6,15 @@ class Command(BaseCommand):
     help = 'Добавляет образовательные видео с VK Video'
 
     def handle(self, *args, **options):
-        # Получаем embed код для видео VK
-        # Формат: https://vk.com/video{owner_id}_{video_id}
+        # Для получения embed кода VK Video:
+        # 1. Откройте видео на VK
+        # 2. Нажмите "Поделиться" -> "Встроить на сайт"
+        # 3. Скопируйте предоставленный VK iframe код
         
         videos_data = [
             {
                 'title': 'Фиксики - Все серии подряд (сборник 26)',
-                'embed_code': '<iframe src="https://vk.com/video_ext.php?oid=183506164&id=456239032&hash=7c5e3c8e8f8e8e8e" width="853" height="480" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>',
+                'embed_code': '<iframe src="https://vkvideo.ru/video_ext.php?oid=-183506164&id=456239442&hash=ef9976b5b4c5fc7a&hd=3" width="1280" height="720" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>',
                 'description': 'Образовательный мультсериал про маленьких человечков, которые живут внутри техники и чинят её.',
                 'order': 1,
             },

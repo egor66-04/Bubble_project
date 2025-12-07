@@ -585,11 +585,5 @@ def ElementDetailAPIView(request, pk):
     return JsonResponse(data)
 
 def video_list(request):
-    """Список образовательных видео с VK Video"""
-    videos = Video.objects.filter(is_active=True).order_by('order', '-created_at')
-    
-    context = {
-        'videos': videos,
-    }
-    
-    return render(request, 'chemistry/video_list.html', context)
+    """Страница с образовательными видео"""
+    return render(request, 'chemistry/video_list.html')

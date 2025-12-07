@@ -289,6 +289,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.trycloudflare.com',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    'https://vkvideo.ru',
+    'https://vk.com',
 ]
 
 # Дополнительные настройки безопасности для production
@@ -300,7 +302,7 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
 else:
     # В режиме разработки разрешаем все источники для CSRF
-    CSRF_TRUSTED_ORIGINS = ['https://*.trycloudflare.com', 'http://*', 'https://*']
+    CSRF_TRUSTED_ORIGINS = ['https://*.trycloudflare.com', 'http://*', 'https://*', 'https://vkvideo.ru', 'https://vk.com']
 
 # Кэширование
 CACHES = {
