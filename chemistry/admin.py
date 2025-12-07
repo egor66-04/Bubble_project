@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
-from .models import ElementCategory, Element, ChemicalReaction, ElementDetail
+from django.utils.safestring import mark_safe
+from .models import ElementCategory, Element, ChemicalReaction, ElementDetail, Video
 
 class ElementDetailInline(admin.StackedInline):
     model = ElementDetail
@@ -154,3 +155,36 @@ class ChemicalReactionAdmin(admin.ModelAdmin):
             'all': ('css/admin/reaction_admin.css',)
         }
         js = ('js/admin/reaction_admin.js',)
+
+@admin.register(Video)
+class VideoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'preview', 'order', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('title', 'description')
+    list_editable = ('order', 'is_active')
+    ordering = ('order', '-created_at')
+    save_on_top = True
+    
+    fieldsets = (
+        (_('Основная информация'), {
+            'fields': ('title', 'description', 'order', 'is_active')
+        }),
+        (_('Код вставки'), {
+            'fields': ('embed_code',),
+            'description': _('Вставьте полный код <iframe> с VK Video. HTML теги будут сохранены.'),
+        }),
+    )
+    
+    def preview(self, obj):
+        """Показывает предпросмотр видео в списке"""
+        if obj.embed_code:
+            # Берем первые 100 символов embed_code для предпросмотра
+            preview_text = obj.embed_code[:100] + '...' if len(obj.embed_code) > 100 else obj.embed_code
+            return format_html('<code style="font-size: 10px;">{}</code>', preview_text)
+        return '-'
+    preview.short_description = _("Превью кода")
+    
+    class Media:
+        css = {
+            'all': ('admin/css/forms.css',)
+        }

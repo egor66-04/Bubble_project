@@ -19,6 +19,7 @@ urlpatterns = [
     path('uses/<int:pk>/', views.use_detail, name='use_detail'),
     path('facts/', views.fact_list, name='fact_list'),
     path('facts/<int:pk>/', views.fact_detail, name='fact_detail'),
+    path('videos/', views.video_list, name='video_list'),
     path('search/', views.search, name='chemistry_search'),
     path('quizzes/', views.quiz_list, name='quiz_list'),
     path('quizzes/<int:pk>/', views.quiz_detail, name='quiz_detail'),

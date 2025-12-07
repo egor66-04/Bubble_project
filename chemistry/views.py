@@ -4,7 +4,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.db.models import Q
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Element, ElementCategory, ChemicalReaction, ElementDetail
+from .models import Element, ElementCategory, ChemicalReaction, ElementDetail, Video
 from accounts.models import LearningProgress, UserQuizResult, Quiz, QuizQuestion, QuizAnswer, UserFavoriteElement, User
 from django.views.generic import ListView, DetailView
 from django.views.decorators.http import require_POST
@@ -583,3 +583,13 @@ def ElementDetailAPIView(request, pk):
         'atomic_number': element.atomic_number
     }
     return JsonResponse(data)
+
+def video_list(request):
+    """Список образовательных видео с VK Video"""
+    videos = Video.objects.filter(is_active=True).order_by('order', '-created_at')
+    
+    context = {
+        'videos': videos,
+    }
+    
+    return render(request, 'chemistry/video_list.html', context)

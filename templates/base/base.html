@@ -121,8 +121,8 @@
                         </li>
                         {% endif %}
                         <li class="nav-item">
-                            <a class="nav-link {% if '/cartoons/' in request.path %}active{% endif %}" href="{% url 'cartoons' %}">
-                                <i class="fas fa-film"></i> {% trans "Мультфильмы" %}
+                            <a class="nav-link {% if '/chemistry/videos/' in request.path %}active{% endif %}" href="{% url 'chemistry:video_list' %}">
+                                <i class="fas fa-video"></i> {% trans "Видео" %}
                             </a>
                         </li>
                         <li class="nav-item">
@@ -248,7 +248,7 @@
                             <li><a href="{% url 'chemistry:periodic_table' %}">{% trans "Таблица Менделеева" %}</a></li>
                             <li><a href="{% url 'chemistry:element_list' %}">{% trans "Элементы" %}</a></li>
                             <li><a href="{% url 'chemistry:reaction_list' %}">{% trans "Реакции" %}</a></li>
-                            <li><a href="{% url 'cartoons' %}">{% trans "Мультфильмы" %}</a></li>
+                            <li><a href="{% url 'chemistry:video_list' %}">{% trans "Видео" %}</a></li>
                             <li><a href="{% url 'about' %}">{% trans "О нас" %}</a></li>
                         </ul>
                     </div>

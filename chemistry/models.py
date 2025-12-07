@@ -90,3 +90,23 @@ class ElementDetail(models.Model):
     
     def __str__(self):
         return f"Детали для {self.element}"
+
+class Video(models.Model):
+    """Образовательное видео с VK Video"""
+    title = models.CharField(_('Название'), max_length=200)
+    embed_code = models.TextField(_('Код вставки (Embed code)'),
+                                  help_text=_('Вставьте код <iframe> с VK Video'))
+    description = models.TextField(_('Описание'), blank=True)
+    order = models.PositiveIntegerField(_('Порядок'), default=0,
+                                       help_text=_('Используется для сортировки (меньше = выше)'))
+    is_active = models.BooleanField(_('Активно'), default=True)
+    created_at = models.DateTimeField(_('Дата создания'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Дата обновления'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Видео')
+        verbose_name_plural = _('Видео')
+        ordering = ['order', '-created_at']
+    
+    def __str__(self):
+        return self.title
