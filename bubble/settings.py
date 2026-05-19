@@ -266,7 +266,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # Настройки аутентификации
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
-LOGIN_URL = 'login'
+LOGIN_URL = 'accounts:login'
 
 # Настройки для отправки email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

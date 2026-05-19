@@ -404,12 +404,12 @@ def remove_reaction_from_favorites(request, reaction_id):
     # Возвращаемся на страницу реакции
     return redirect('chemistry:reaction_detail', pk=reaction_id)
 
-@login_required
 def subscription(request):
     """Страница информации о подписке"""
     # Проверяем статус подписки пользователя
-    is_subscribed = request.user.is_subscribed
-    subscription_end_date = request.user.subscription_end_date
+    is_subscribed = getattr(request.user, 'is_subscribed', False) if request.user.is_authenticated else False
+    subscription_end_date = getattr(request.user, 'subscription_end_date', None) if request.user.is_authenticated else None
+
     
     # Проверяем, не истек ли срок подписки
     if is_subscribed and subscription_end_date and subscription_end_date < timezone.now():
