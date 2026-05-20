@@ -73,11 +73,212 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isAuthenticated) {
         // Проверяем новые достижения сразу при загрузке страницы
         checkNewAchievements();
-        
-        // И периодически проверяем каждые 60 секунд (оптимизация)
         setInterval(checkNewAchievements, 60000);
     }
+
+    // === NEW UX IMPROVEMENTS ===
+    initPageLoader();
+    initToastSystem();
+    initScrollTop();
+    initFormSpinners();
+    initSearchValidation();
+    initLazyImages();
 });
+
+// ================================
+// PAGE LOADER
+// ================================
+function initPageLoader() {
+    const loader = document.getElementById('page-loader');
+    if (!loader) return;
+
+    // Показываем loader при переходе по ссылкам
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (!link) return;
+        if (link.target === '_blank') return;
+        if (link.href && link.href.startsWith(window.location.origin) && !link.href.includes('#')) {
+            loader.classList.add('loading');
+        }
+    });
+
+    // Скрываем когда страница загружена
+    window.addEventListener('pageshow', function() {
+        loader.classList.remove('loading');
+        loader.classList.add('done');
+        setTimeout(() => {
+            loader.classList.remove('done');
+            loader.style.width = '';
+        }, 600);
+    });
+}
+
+// ================================
+// TOAST SYSTEM
+// ================================
+const ToastManager = {
+    icons: {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-times-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle',
+        debug: 'fas fa-bug'
+    },
+    titles: {
+        success: 'Успешно',
+        error: 'Ошибка',
+        warning: 'Внимание',
+        info: 'Информация',
+        debug: 'Debug'
+    },
+
+    show(message, type = 'info', duration = 4000) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const normalizedType = this._normalizeType(type);
+        const toast = document.createElement('div');
+        toast.className = `bubble-toast toast-${normalizedType}`;
+
+        toast.innerHTML = `
+            <div class="bubble-toast-icon">
+                <i class="${this.icons[normalizedType] || this.icons.info}"></i>
+            </div>
+            <div class="bubble-toast-body">
+                <div class="bubble-toast-title">${this.titles[normalizedType] || 'Уведомление'}</div>
+                <p class="bubble-toast-message">${message}</p>
+            </div>
+            <button class="bubble-toast-close" aria-label="Закрыть"><i class="fas fa-times"></i></button>
+            <div class="bubble-toast-progress" style="animation-duration: ${duration}ms"></div>
+        `;
+
+        container.appendChild(toast);
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => toast.classList.add('show'));
+        });
+
+        const close = () => {
+            toast.classList.add('hide');
+            setTimeout(() => toast.remove(), 400);
+        };
+
+        toast.querySelector('.bubble-toast-close').addEventListener('click', close);
+        setTimeout(close, duration);
+    },
+
+    _normalizeType(type) {
+        if (!type) return 'info';
+        if (type.includes('success')) return 'success';
+        if (type.includes('error') || type.includes('danger')) return 'error';
+        if (type.includes('warning')) return 'warning';
+        return 'info';
+    }
+};
+
+function initToastSystem() {
+    // Показываем Django messages как toasts
+    const messagesContainer = document.getElementById('django-messages');
+    if (messagesContainer) {
+        const spans = messagesContainer.querySelectorAll('span[data-msg-type]');
+        spans.forEach((span, index) => {
+            setTimeout(() => {
+                ToastManager.show(span.dataset.msgText, span.dataset.msgType);
+            }, index * 200);
+        });
+    }
+}
+
+// Глобальный доступ
+window.BubbleToast = ToastManager;
+
+// ================================
+// SCROLL TO TOP
+// ================================
+function initScrollTop() {
+    const btn = document.getElementById('scroll-top-btn');
+    if (!btn) return;
+
+    const onScroll = Utils.throttle(() => {
+        btn.classList.toggle('visible', window.scrollY > 300);
+    }, 100);
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    btn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+// ================================
+// FORM SPINNERS + DOUBLE SUBMIT PROTECTION
+// ================================
+function initFormSpinners() {
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function() {
+            const submitBtn = this.querySelector('[type="submit"]');
+            if (!submitBtn || submitBtn.classList.contains('btn-loading')) return;
+
+            // Wrap text in span for hiding during loading
+            if (!submitBtn.querySelector('.btn-text')) {
+                submitBtn.innerHTML = `<span class="btn-text">${submitBtn.innerHTML}</span>`;
+            }
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
+
+            // Safety timeout — разблокировать через 10с
+            setTimeout(() => {
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.disabled = false;
+            }, 10000);
+        });
+    });
+}
+
+// ================================
+// SEARCH VALIDATION
+// ================================
+function initSearchValidation() {
+    document.querySelectorAll('form[action*="search"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const input = this.querySelector('input[name="q"]');
+            if (input && input.value.trim() === '') {
+                e.preventDefault();
+                input.focus();
+                input.classList.add('is-invalid');
+                setTimeout(() => input.classList.remove('is-invalid'), 2000);
+            }
+        });
+    });
+}
+
+// ================================
+// LAZY IMAGE LOAD
+// ================================
+function initLazyImages() {
+    if (!('IntersectionObserver' in window)) {
+        // Fallback: mark all as loaded
+        document.querySelectorAll('img[loading="lazy"]').forEach(img => img.classList.add('loaded'));
+        return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('loaded');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { rootMargin: '50px' });
+
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+        if (img.complete) {
+            img.classList.add('loaded');
+        } else {
+            img.addEventListener('load', () => img.classList.add('loaded'));
+            observer.observe(img);
+        }
+    });
+}
+
 
 /**
  * Настраивает функционал добавления элементов в избранное

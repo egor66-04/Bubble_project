@@ -80,12 +80,14 @@
     </script>
 </head>
 <body class="{% if user.is_authenticated %}user-authenticated{% endif %}">
+    <!-- Page loader -->
+    <div id="page-loader"></div>
     <div class="bubble-wrapper">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg bubble-navbar">
             <div class="container">
                 <a class="navbar-brand" href="{% url 'home' %}" aria-label="Перейти на главную страницу Bubble">
-                    <img src="{% static 'images/bubble-logo.png' %}" alt="Логотип Bubble - интерактивная таблица Менделеева" class="bubble-logo">
+                    <img src="{% static 'images/bubble-logo.png' %}" alt="Логотип Bubble - интерактивная таблица Менделеева" class="bubble-logo" loading="lazy">
                     <span class="bubble-title">Bubble</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-label="Открыть меню навигации">
@@ -210,12 +212,9 @@
 
         <!-- Сообщения -->
         {% if messages %}
-        <div class="container mt-3">
+        <div id="django-messages" hidden>
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} bubble-alert alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+            <span data-msg-type="{{ message.tags }}" data-msg-text="{{ message }}"></span>
             {% endfor %}
         </div>
         {% endif %}
@@ -229,6 +228,14 @@
         <button id="tts-toggle" class="btn bubble-btn-floating" title="{% trans 'Включить/выключить озвучку' %}">
             <i class="fas fa-volume-up"></i>
         </button>
+
+        <!-- Scroll to top -->
+        <button id="scroll-top-btn" title="Наверх" aria-label="Прокрутить вверх">
+            <i class="fas fa-chevron-up"></i>
+        </button>
+
+        <!-- Toast контейнер -->
+        <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
         <!-- Footer -->
         <footer class="bubble-footer py-4">

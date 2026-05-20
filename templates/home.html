@@ -100,39 +100,48 @@
     <section class="bubble-popular-elements my-5">
         <h2 class="text-center bubble-section-title">{% trans "Популярные элементы" %}</h2>
         <div class="element-cards-container">
-            <!-- Здесь будут карточки популярных элементов из базы данных -->
-            <!-- Заглушки для демонстрации -->
-            <div class="element-card hydrogen">
-                <div class="element-symbol">H</div>
-                <div class="element-number">1</div>
-                <div class="element-name">{% trans "Водород" %}</div>
-                <div class="element-weight">1.008</div>
-            </div>
-            <div class="element-card oxygen">
-                <div class="element-symbol">O</div>
-                <div class="element-number">8</div>
-                <div class="element-name">{% trans "Кислород" %}</div>
-                <div class="element-weight">15.999</div>
-            </div>
-            <div class="element-card carbon">
-                <div class="element-symbol">C</div>
-                <div class="element-number">6</div>
-                <div class="element-name">{% trans "Углерод" %}</div>
-                <div class="element-weight">12.011</div>
-            </div>
-            <div class="element-card gold">
-                <div class="element-symbol">Au</div>
-                <div class="element-number">79</div>
-                <div class="element-name">{% trans "Золото" %}</div>
-                <div class="element-weight">196.97</div>
-            </div>
-            <div class="element-card helium">
-                <div class="element-symbol">He</div>
-                <div class="element-number">2</div>
-                <div class="element-name">{% trans "Гелий" %}</div>
-                <div class="element-weight">4.003</div>
-            </div>
+            <a href="{% url 'chemistry:element_detail' 1 %}" class="element-card-link">
+                <div class="element-card hydrogen">
+                    <div class="element-symbol">H</div>
+                    <div class="element-number">1</div>
+                    <div class="element-name">{% trans "Водород" %}</div>
+                    <div class="element-weight">1.008</div>
+                </div>
+            </a>
+            <a href="{% url 'chemistry:element_detail' 8 %}" class="element-card-link">
+                <div class="element-card oxygen">
+                    <div class="element-symbol">O</div>
+                    <div class="element-number">8</div>
+                    <div class="element-name">{% trans "Кислород" %}</div>
+                    <div class="element-weight">15.999</div>
+                </div>
+            </a>
+            <a href="{% url 'chemistry:element_detail' 6 %}" class="element-card-link">
+                <div class="element-card carbon">
+                    <div class="element-symbol">C</div>
+                    <div class="element-number">6</div>
+                    <div class="element-name">{% trans "Углерод" %}</div>
+                    <div class="element-weight">12.011</div>
+                </div>
+            </a>
+            <a href="{% url 'chemistry:element_detail' 79 %}" class="element-card-link">
+                <div class="element-card gold">
+                    <div class="element-symbol">Au</div>
+                    <div class="element-number">79</div>
+                    <div class="element-name">{% trans "Золото" %}</div>
+                    <div class="element-weight">196.97</div>
+                </div>
+            </a>
+            <a href="{% url 'chemistry:element_detail' 2 %}" class="element-card-link">
+                <div class="element-card helium">
+                    <div class="element-symbol">He</div>
+                    <div class="element-number">2</div>
+                    <div class="element-name">{% trans "Гелий" %}</div>
+                    <div class="element-weight">4.003</div>
+                </div>
+            </a>
         </div>
+
         <div class="text-center mt-4">
             <a href="{% url 'chemistry:element_list' %}" class="btn bubble-btn" aria-label="Перейти к полному списку химических элементов">
                 <i class="fas fa-flask me-2" aria-hidden="true"></i> {% trans "Смотреть все элементы" %}

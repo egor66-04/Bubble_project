@@ -1,30 +1,33 @@
-/* Основные цвета сайта */
+/* Основные цвета сайта (legacy — переопределяются style_enhanced.css) */
+/* style_enhanced.css подключается вторым и имеет приоритет */
 :root {
-    --bubble-primary: #4a86e8;         /* Основной синий */
-    --bubble-primary-light: #6fa8ff;   /* Светло-синий */
-    --bubble-primary-dark: #2a5db0;    /* Темно-синий */
-    
-    --bubble-secondary: #e84a9c;       /* Основной розовый */
-    --bubble-secondary-light: #ff7cbf; /* Светло-розовый */
-    --bubble-secondary-dark: #b0276a;  /* Темно-розовый */
-    
-    --bubble-success: #5DCB85;         /* Зеленый для успеха */
-    --bubble-warning: #FFD966;         /* Желтый для предупреждений */
-    --bubble-danger: #FF6B6B;          /* Красный для ошибок */
-    
-    --bubble-bg: #f9faff;              /* Фон страницы */
-    --bubble-text: #333;               /* Основной текст */
-    --bubble-text-light: #666;         /* Светлый текст */
-    
-    --border-radius-sm: 8px;           /* Скругление маленькое */
-    --border-radius-md: 16px;          /* Скругление среднее */
-    --border-radius-lg: 24px;          /* Скругление большое */
-    --border-radius-xl: 36px;          /* Скругление очень большое */
-    
-    --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
-    --shadow-lg: 0 15px 45px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05);
+    /* Эти переменные используются только в style.css */
+    --bubble-primary: #667eea;
+    --bubble-primary-light: #8b9cff;
+    --bubble-primary-dark: #4a5db0;
+
+    --bubble-secondary: #764ba2;
+    --bubble-secondary-light: #9a6bc5;
+    --bubble-secondary-dark: #5a3780;
+
+    --bubble-success: #4facfe;
+    --bubble-warning: #f6d365;
+    --bubble-danger: #fa709a;
+
+    --bubble-bg: #f5f7fa;
+    --bubble-text: #2d3748;
+    --bubble-text-light: #718096;
+
+    --border-radius-sm: 6px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 18px;
+    --border-radius-xl: 28px;
+
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
+
 
 /* Общие стили */
 body {

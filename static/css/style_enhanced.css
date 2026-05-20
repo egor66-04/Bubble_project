@@ -978,3 +978,373 @@ a:hover {
 .p-4 { padding: var(--space-4); }
 .p-5 { padding: var(--space-5); }
 .p-6 { padding: var(--space-6); }
+
+/* ================================
+   PAGE LOADER (top progress bar)
+   ================================ */
+#page-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #f093fb, #4facfe);
+    background-size: 200% 100%;
+    z-index: 9999;
+    transition: width 0.3s ease;
+    animation: loaderShimmer 1.5s linear infinite;
+}
+
+#page-loader.loading {
+    width: 70%;
+}
+
+#page-loader.done {
+    width: 100%;
+    opacity: 0;
+    transition: width 0.2s ease, opacity 0.4s ease 0.1s;
+}
+
+@keyframes loaderShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ================================
+   TOAST NOTIFICATIONS
+   ================================ */
+#toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9990;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+    max-width: 380px;
+}
+
+.bubble-toast {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-2xl);
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    pointer-events: all;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    border-left: 4px solid var(--bubble-primary);
+    min-width: 280px;
+}
+
+.bubble-toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.bubble-toast.hide {
+    transform: translateX(120%);
+    opacity: 0;
+}
+
+.bubble-toast-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.bubble-toast-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.bubble-toast-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--bubble-gray-800);
+    margin-bottom: 2px;
+}
+
+.bubble-toast-message {
+    font-size: 0.85rem;
+    color: var(--bubble-gray-600);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.bubble-toast-close {
+    background: none;
+    border: none;
+    color: var(--bubble-gray-400);
+    cursor: pointer;
+    padding: 2px;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: color var(--transition-fast);
+    line-height: 1;
+}
+
+.bubble-toast-close:hover {
+    color: var(--bubble-gray-700);
+}
+
+/* Toast variants */
+.bubble-toast.toast-success { border-left-color: #10b981; }
+.bubble-toast.toast-success .bubble-toast-icon { background: linear-gradient(135deg, #10b981, #059669); }
+
+.bubble-toast.toast-error { border-left-color: #ef4444; }
+.bubble-toast.toast-error .bubble-toast-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+.bubble-toast.toast-warning { border-left-color: #f59e0b; }
+.bubble-toast.toast-warning .bubble-toast-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+.bubble-toast.toast-info { border-left-color: var(--bubble-primary); }
+
+/* Progress bar inside toast */
+.bubble-toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--bubble-primary);
+    border-radius: 0 0 0 var(--radius-lg);
+    animation: toastProgress linear forwards;
+}
+
+.bubble-toast { position: relative; overflow: hidden; }
+
+@keyframes toastProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* ================================
+   BUTTON LOADING SPINNER
+   ================================ */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn-loading .btn-text { visibility: hidden; }
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: btnSpin 0.7s linear infinite;
+}
+
+.btn-loading.btn-outline-secondary::after,
+.btn-loading.bubble-btn-outline::after {
+    border-color: rgba(102, 126, 234, 0.3);
+    border-top-color: var(--bubble-primary);
+}
+
+@keyframes btnSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* ================================
+   SCROLL TO TOP BUTTON
+   ================================ */
+#scroll-top-btn {
+    position: fixed;
+    bottom: 100px;
+    right: 28px;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-full);
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-xl);
+    z-index: 990;
+    opacity: 0;
+    transform: translateY(16px) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+}
+
+#scroll-top-btn.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+#scroll-top-btn:hover {
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: var(--shadow-2xl);
+}
+
+/* ================================
+   EMPTY STATES
+   ================================ */
+.empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+
+.empty-state-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    background: var(--bubble-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    color: var(--bubble-primary);
+}
+
+.empty-state h5 {
+    font-size: 1.25rem;
+    color: var(--bubble-gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--bubble-gray-500);
+    font-size: 0.95rem;
+    max-width: 360px;
+    margin: 0 auto 1.5rem;
+}
+
+/* ================================
+   PREMIUM BUTTON HOVER EFFECT
+   ================================ */
+.btn-premium {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    color: #7c4700;
+    font-weight: 700;
+    border: none;
+    box-shadow: 0 4px 20px rgba(253, 160, 133, 0.5);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-premium::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+    transform: scale(0);
+    transition: transform 0.5s ease;
+}
+
+.btn-premium:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 30px rgba(253, 160, 133, 0.7);
+    color: #5c3400;
+}
+
+.btn-premium:hover::before {
+    transform: scale(1);
+}
+
+.btn-premium:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Pulse animation for Premium CTA */
+@keyframes premiumPulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(253, 160, 133, 0.5); }
+    50% { box-shadow: 0 4px 30px rgba(253, 160, 133, 0.9); }
+}
+
+.btn-premium-pulse {
+    animation: premiumPulse 2s ease-in-out infinite;
+}
+
+/* ================================
+   LAZY LOAD IMAGE PLACEHOLDER
+   ================================ */
+img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+img[loading="lazy"].loaded {
+    opacity: 1;
+}
+
+/* ================================
+   FLOATING BUTTON Z-INDEX FIX
+   ================================ */
+.bubble-btn-floating {
+    z-index: 1000 !important;
+}
+
+/* ================================
+   FORM SEARCH VALIDATION
+   ================================ */
+.search-empty-warning {
+    font-size: 0.8rem;
+    color: var(--bubble-danger);
+    display: none;
+    margin-top: 4px;
+}
+
+/* ================================
+   ELEMENT CARD CLICKABLE (home)
+   ================================ */
+a.element-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+a.element-card-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ================================
+   MOBILE ADJUSTMENTS
+   ================================ */
+@media (max-width: 576px) {
+    #toast-container {
+        bottom: 12px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+    }
+
+    #scroll-top-btn {
+        bottom: 90px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}

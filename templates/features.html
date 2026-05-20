@@ -157,20 +157,18 @@
     </div>
 
     <div class="row mb-5 justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8">
-            <div class="position-relative text-center bubble-premium-section" style="max-width: 800px; margin: 0 auto;">
-                <img src="{% static 'images/bubble_pro_poster.jpg' %}" alt="Bubble PRO — Химия легко!"
-                    class="img-fluid rounded-4 premium-poster-img shadow-lg"
-                    style="width: 100%; height: auto; display: block; border: none;">
-
-                <div class="premium-cta-overlay"
-                    style="position: absolute; bottom: 8.5%; left: 0; width: 100%; text-align: center;">
-                    <a href="{% url 'accounts:subscription' %}"
-                        class="btn btn-warning btn-lg px-5 shadow-sm text-dark bubble-btn-pill"
-                        style="border-radius: 50px; text-transform: none; font-weight: 600;">
-                        <i class="fas fa-crown me-2"></i>Попробовать Premium
-                    </a>
-                </div>
+        <div class="col-12 col-md-10 col-lg-8 text-center">
+            <img src="{% static 'images/bubble_pro_poster.jpg' %}"
+                 alt="Bubble PRO — Химия легко!"
+                 class="img-fluid rounded-4 shadow-lg d-block mx-auto"
+                 loading="lazy"
+                 style="max-width: 600px; width: 100%; height: auto;">
+            <div class="mt-4">
+                <a href="{% url 'accounts:subscription' %}"
+                   class="btn btn-premium btn-premium-pulse btn-lg px-5"
+                   style="border-radius: 50px; font-size: 1.2rem;">
+                    <i class="fas fa-crown me-2"></i>Попробовать Premium
+                </a>
             </div>
         </div>
     </div>
